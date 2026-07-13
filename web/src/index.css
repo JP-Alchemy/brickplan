@@ -1,0 +1,71 @@
+/* BrickPlan — quiet instrument panel. One accent, hairlines, no chrome. */
+
+:root {
+  --bg: #faf8f3;
+  --ink: #211e1a;
+  --ink-soft: #6f6a61;
+  --hairline: #ddd6c9;
+  --mortar: #eae4d8;
+  --brick: #b3a99c;
+  --brick-cut: #c4bbae;
+  --accent: #c2451e;
+
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+}
+
+#root {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+header.masthead {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+}
+
+header.masthead h1 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+header.masthead p {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.wall-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+}
+
+.stats-line {
+  margin-top: 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}

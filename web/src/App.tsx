@@ -1,7 +1,8 @@
+import WallCanvas from './components/WallCanvas';
 import { planWall } from './planner';
 import type { WallSpec } from './types';
 
-// M2 proof: a hardcoded spec planned live via WASM, plan on the console.
+// M3: a hardcoded spec rendered as a completed wall. Live controls follow.
 const demoSpec: WallSpec = {
   width: 3000,
   height: 2400,
@@ -11,20 +12,24 @@ const demoSpec: WallSpec = {
 };
 
 const result = planWall(demoSpec);
-console.log('planWall result', result);
 
 export default function App() {
   if (result.err) {
     return <p>Planning failed: {JSON.stringify(result.err)}</p>;
   }
-  const { stats, placements, steps } = result.ok;
+  const plan = result.ok;
+  const { stats } = plan;
   return (
     <main>
-      <h1>BrickPlan</h1>
-      <p>
-        Planned a {demoSpec.width}×{demoSpec.height}mm wall in Rust/WASM: {stats.courses} courses,{' '}
-        {placements.length} bricks ({stats.full_bricks} full, {stats.half_bricks} half,{' '}
-        {stats.cut_bricks} cut), {steps.length} steps. Full plan on the console.
+      <header className="masthead">
+        <h1>BrickPlan</h1>
+        <p>a wall spec becomes a plan becomes a wall</p>
+      </header>
+      <WallCanvas plan={plan} />
+      <p className="stats-line">
+        {plan.spec.width} × {plan.spec.height} mm · {stats.courses} courses ·{' '}
+        {plan.placements.length} bricks ({stats.full_bricks} full, {stats.half_bricks} half,{' '}
+        {stats.cut_bricks} cut) · {plan.steps.length} steps
       </p>
     </main>
   );
