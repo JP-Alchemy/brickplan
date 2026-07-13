@@ -107,7 +107,7 @@ export default function App() {
   };
 
   return (
-    <main>
+    <main className="app-frame">
       <header className="masthead">
         <h1>BrickPlan</h1>
         <p>a wall spec becomes a plan becomes a wall</p>

@@ -1,21 +1,19 @@
-/* BrickPlan — quiet instrument panel. One accent, hairlines, no chrome. */
+/* BrickPlan — instrument panel in Monumental's palette: cream ground,
+   indigo ink and hairlines, one orange accent, editorial serif display. */
 
 :root {
-  --bg: #faf8f3;
-  --ink: #211e1a;
-  --ink-soft: #6f6a61;
-  --hairline: #ddd6c9;
-  --mortar: #eae4d8;
-  --brick: #b3a99c;
-  --brick-cut: #c4bbae;
-  --accent: #c2451e;
+  --bg: #fffdee;
+  --ink: #1a024d;
+  --ink-soft: rgba(26, 2, 77, 0.6);
+  --line: #1a024d;
+  --hairline: rgba(26, 2, 77, 0.28);
+  --wine: #721e3c;
+  --mortar: #f0ecd4;
+  --brick: #c1b7a4;
+  --brick-cut: #d6cdba;
+  --accent: #f74823;
 
-  font-family:
-    'Inter',
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    sans-serif;
+  font-family: 'Satoshi', system-ui, sans-serif;
   color: var(--ink);
   background: var(--bg);
   font-size: 15px;
@@ -32,71 +30,83 @@ body {
 }
 
 #root {
-  max-width: 68rem;
+  max-width: 72rem;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 2.5rem 2rem;
 }
 
-.layout {
-  display: flex;
-  gap: 2.5rem;
-  align-items: flex-start;
-}
-
-.stage {
-  flex: 1;
-  min-width: 0;
+/* The whole app sits in one bordered frame, sectioned by rules —
+   the drafting-sheet grid of monumental.co's homepage. */
+.app-frame {
+  border: 1px solid var(--line);
 }
 
 header.masthead {
   display: flex;
   align-items: baseline;
-  gap: 1rem;
-  padding-bottom: 1.25rem;
+  gap: 1.25rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--line);
 }
 
 header.masthead h1 {
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.005em;
 }
 
-header.masthead p {
-  color: var(--ink-soft);
-  font-size: 0.85rem;
+header.masthead > p {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--wine);
+}
+
+.layout {
+  display: flex;
+  align-items: stretch;
+}
+
+.stage {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem;
 }
 
 .info-button {
   margin-left: auto;
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 1px solid var(--hairline);
+  align-self: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid var(--line);
   border-radius: 50%;
   background: none;
-  color: var(--ink-soft);
-  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--ink);
+  font-family: 'Instrument Serif', Georgia, serif;
   font-style: italic;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   line-height: 1;
   cursor: pointer;
 }
 
 .info-button:hover {
-  color: var(--accent);
-  border-color: var(--accent);
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .info-dialog {
   margin: auto;
   max-width: 30rem;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--line);
   background: var(--bg);
   color: var(--ink);
   padding: 0;
 }
 
 .info-dialog::backdrop {
-  background: rgba(33, 30, 26, 0.35);
+  background: rgba(26, 2, 77, 0.45);
 }
 
 .info-body {
@@ -104,15 +114,14 @@ header.masthead p {
 }
 
 .info-body h2 {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  color: var(--wine);
   margin-bottom: 0.5rem;
 }
 
-.info-body h2 + h2,
 .info-body p + h2,
 .info-body ul + h2 {
   margin-top: 1.5rem;
@@ -132,9 +141,13 @@ header.masthead p {
 }
 
 .info-body a {
-  color: var(--accent);
+  color: var(--wine);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.info-body a:hover {
+  color: var(--accent);
 }
 
 .info-close {
@@ -142,21 +155,22 @@ header.masthead p {
   font-size: 0.85rem;
   color: var(--ink);
   background: none;
-  border: 1px solid var(--hairline);
-  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--line);
+  padding: 0.3rem 0.9rem;
   margin-top: 1.5rem;
   cursor: pointer;
 }
 
 .info-close:hover {
-  border-color: var(--ink-soft);
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .wall-canvas {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--line);
   background: var(--bg);
 }
 
@@ -167,7 +181,7 @@ header.masthead p {
   font-variant-numeric: tabular-nums;
 }
 
-/* The brick that just landed settles from accent to its resting grey. */
+/* The brick that just landed settles from accent to its resting tone. */
 .brick.just-placed {
   animation: settle 0.5s ease-out;
 }
@@ -182,23 +196,25 @@ header.masthead p {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--hairline);
 }
 
 .playback-bar button {
   font: inherit;
   font-size: 0.85rem;
+  font-weight: 500;
   color: var(--ink);
   background: none;
-  border: 1px solid var(--hairline);
-  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--line);
+  padding: 0.3rem 0.75rem;
   cursor: pointer;
 }
 
 .playback-bar button:hover {
-  border-color: var(--ink-soft);
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .play-toggle {
@@ -219,18 +235,13 @@ header.masthead p {
 }
 
 .speed-toggle button.active {
-  color: var(--accent);
-  border-color: var(--accent);
-  border-left-width: 1px;
-}
-
-.speed-toggle button.active + button {
-  border-left-width: 0;
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .playback-bar input[type='range'] {
   flex: 1;
-  accent-color: var(--accent);
+  accent-color: var(--ink);
 }
 
 .step-counter {
@@ -268,7 +279,7 @@ header.masthead p {
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: 0.75rem;
   line-height: 1.45;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--line);
   padding: 1rem;
   max-height: 22rem;
   overflow: auto;
@@ -279,24 +290,26 @@ header.masthead p {
   font-size: 0.85rem;
   color: var(--ink);
   background: none;
-  border: 1px solid var(--hairline);
-  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--line);
+  padding: 0.3rem 0.75rem;
   margin-top: 0.75rem;
   cursor: pointer;
 }
 
 .plan-panel-body button:hover {
-  border-color: var(--ink-soft);
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .plan-error {
-  border: 1px solid var(--hairline);
-  border-left: 2px solid var(--accent);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
   padding: 1.5rem;
 }
 
 .plan-error p:first-child {
-  color: var(--accent);
+  color: var(--wine);
+  font-weight: 700;
 }
 
 .plan-error p + p {
@@ -306,27 +319,27 @@ header.masthead p {
 }
 
 .spec-controls {
-  width: 15rem;
+  width: 16rem;
   flex-shrink: 0;
+  padding: 1.5rem;
+  border-left: 1px solid var(--line);
 }
 
 .spec-controls h2 {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+  color: var(--wine);
   margin-bottom: 0.75rem;
-}
-
-.spec-controls h2 + h2,
-.spec-controls .field + h2,
-.kind-toggle + .field {
-  margin-top: 1rem;
 }
 
 .spec-controls > h2:not(:first-child) {
   margin-top: 2rem;
+}
+
+.kind-toggle + .field {
+  margin-top: 1rem;
 }
 
 .field + .field {
@@ -365,7 +378,7 @@ header.masthead p {
 .field input[type='range'] {
   width: 100%;
   margin-top: 0.35rem;
-  accent-color: var(--accent);
+  accent-color: var(--ink);
 }
 
 .kind-toggle {
@@ -375,11 +388,12 @@ header.masthead p {
 .kind-toggle button {
   font: inherit;
   font-size: 0.85rem;
+  font-weight: 500;
   color: var(--ink);
   background: none;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--line);
   border-left-width: 0;
-  padding: 0.25rem 0;
+  padding: 0.3rem 0;
   flex: 1;
   cursor: pointer;
 }
@@ -389,15 +403,11 @@ header.masthead p {
 }
 
 .kind-toggle button:hover {
-  border-color: var(--ink-soft);
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .kind-toggle button.active {
-  color: var(--accent);
-  border-color: var(--accent);
-  border-left-width: 1px;
-}
-
-.kind-toggle button.active + button {
-  border-left-width: 0;
+  background: var(--ink);
+  color: var(--bg);
 }
