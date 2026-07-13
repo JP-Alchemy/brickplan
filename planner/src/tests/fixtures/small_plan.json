@@ -1,0 +1,467 @@
+{
+  "placements": [
+    {
+      "course": 0,
+      "id": 0,
+      "kind": {
+        "type": "Full"
+      },
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "course": 0,
+      "id": 1,
+      "kind": {
+        "length": 120.0,
+        "type": "Cut"
+      },
+      "x": 220.0,
+      "y": 0.0
+    },
+    {
+      "course": 0,
+      "id": 2,
+      "kind": {
+        "length": 90.0,
+        "type": "Cut"
+      },
+      "x": 560.0,
+      "y": 0.0
+    },
+    {
+      "course": 0,
+      "id": 3,
+      "kind": {
+        "type": "Full"
+      },
+      "x": 660.0,
+      "y": 0.0
+    },
+    {
+      "course": 1,
+      "id": 4,
+      "kind": {
+        "type": "Half"
+      },
+      "x": 0.0,
+      "y": 60.0
+    },
+    {
+      "course": 1,
+      "id": 5,
+      "kind": {
+        "type": "Full"
+      },
+      "x": 110.0,
+      "y": 60.0
+    },
+    {
+      "course": 1,
+      "id": 6,
+      "kind": {
+        "length": 200.0,
+        "type": "Cut"
+      },
+      "x": 560.0,
+      "y": 60.0
+    },
+    {
+      "course": 1,
+      "id": 7,
+      "kind": {
+        "length": 130.0,
+        "type": "Cut"
+      },
+      "x": 770.0,
+      "y": 60.0
+    },
+    {
+      "course": 2,
+      "id": 8,
+      "kind": {
+        "type": "Full"
+      },
+      "x": 0.0,
+      "y": 120.0
+    },
+    {
+      "course": 2,
+      "id": 9,
+      "kind": {
+        "length": 120.0,
+        "type": "Cut"
+      },
+      "x": 220.0,
+      "y": 120.0
+    },
+    {
+      "course": 2,
+      "id": 10,
+      "kind": {
+        "length": 90.0,
+        "type": "Cut"
+      },
+      "x": 560.0,
+      "y": 120.0
+    },
+    {
+      "course": 2,
+      "id": 11,
+      "kind": {
+        "type": "Full"
+      },
+      "x": 660.0,
+      "y": 120.0
+    },
+    {
+      "course": 3,
+      "id": 12,
+      "kind": {
+        "type": "Half"
+      },
+      "x": 0.0,
+      "y": 180.0
+    },
+    {
+      "course": 3,
+      "id": 13,
+      "kind": {
+        "type": "Full"
+      },
+      "x": 110.0,
+      "y": 180.0
+    },
+    {
+      "course": 3,
+      "id": 14,
+      "kind": {
+        "type": "Full"
+      },
+      "x": 330.0,
+      "y": 180.0
+    },
+    {
+      "course": 3,
+      "id": 15,
+      "kind": {
+        "type": "Full"
+      },
+      "x": 550.0,
+      "y": 180.0
+    },
+    {
+      "course": 3,
+      "id": 16,
+      "kind": {
+        "length": 130.0,
+        "type": "Cut"
+      },
+      "x": 770.0,
+      "y": 180.0
+    }
+  ],
+  "spec": {
+    "brick": {
+      "height": 50.0,
+      "length": 210.0,
+      "width": 100.0
+    },
+    "height": 230.0,
+    "joint": 10.0,
+    "opening": {
+      "height": 170.0,
+      "sill_height": 0.0,
+      "width": 220.0,
+      "x": 340.0
+    },
+    "width": 900.0
+  },
+  "stats": {
+    "courses": 4,
+    "cut_bricks": 7,
+    "full_bricks": 8,
+    "half_bricks": 2
+  },
+  "steps": [
+    {
+      "action": {
+        "kind": {
+          "type": "Full"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 0
+    },
+    {
+      "action": {
+        "placement_id": 0,
+        "type": "PlaceBrick"
+      },
+      "seq": 1
+    },
+    {
+      "action": {
+        "kind": {
+          "length": 120.0,
+          "type": "Cut"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 2
+    },
+    {
+      "action": {
+        "placement_id": 1,
+        "type": "PlaceBrick"
+      },
+      "seq": 3
+    },
+    {
+      "action": {
+        "kind": {
+          "length": 90.0,
+          "type": "Cut"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 4
+    },
+    {
+      "action": {
+        "placement_id": 2,
+        "type": "PlaceBrick"
+      },
+      "seq": 5
+    },
+    {
+      "action": {
+        "kind": {
+          "type": "Full"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 6
+    },
+    {
+      "action": {
+        "placement_id": 3,
+        "type": "PlaceBrick"
+      },
+      "seq": 7
+    },
+    {
+      "action": {
+        "kind": {
+          "type": "Half"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 8
+    },
+    {
+      "action": {
+        "placement_id": 4,
+        "type": "PlaceBrick"
+      },
+      "seq": 9
+    },
+    {
+      "action": {
+        "kind": {
+          "type": "Full"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 10
+    },
+    {
+      "action": {
+        "placement_id": 5,
+        "type": "PlaceBrick"
+      },
+      "seq": 11
+    },
+    {
+      "action": {
+        "kind": {
+          "length": 200.0,
+          "type": "Cut"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 12
+    },
+    {
+      "action": {
+        "placement_id": 6,
+        "type": "PlaceBrick"
+      },
+      "seq": 13
+    },
+    {
+      "action": {
+        "kind": {
+          "length": 130.0,
+          "type": "Cut"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 14
+    },
+    {
+      "action": {
+        "placement_id": 7,
+        "type": "PlaceBrick"
+      },
+      "seq": 15
+    },
+    {
+      "action": {
+        "kind": {
+          "type": "Full"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 16
+    },
+    {
+      "action": {
+        "placement_id": 8,
+        "type": "PlaceBrick"
+      },
+      "seq": 17
+    },
+    {
+      "action": {
+        "kind": {
+          "length": 120.0,
+          "type": "Cut"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 18
+    },
+    {
+      "action": {
+        "placement_id": 9,
+        "type": "PlaceBrick"
+      },
+      "seq": 19
+    },
+    {
+      "action": {
+        "kind": {
+          "length": 90.0,
+          "type": "Cut"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 20
+    },
+    {
+      "action": {
+        "placement_id": 10,
+        "type": "PlaceBrick"
+      },
+      "seq": 21
+    },
+    {
+      "action": {
+        "kind": {
+          "type": "Full"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 22
+    },
+    {
+      "action": {
+        "placement_id": 11,
+        "type": "PlaceBrick"
+      },
+      "seq": 23
+    },
+    {
+      "action": {
+        "kind": {
+          "type": "Half"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 24
+    },
+    {
+      "action": {
+        "placement_id": 12,
+        "type": "PlaceBrick"
+      },
+      "seq": 25
+    },
+    {
+      "action": {
+        "kind": {
+          "type": "Full"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 26
+    },
+    {
+      "action": {
+        "placement_id": 13,
+        "type": "PlaceBrick"
+      },
+      "seq": 27
+    },
+    {
+      "action": {
+        "kind": {
+          "type": "Full"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 28
+    },
+    {
+      "action": {
+        "placement_id": 14,
+        "type": "PlaceBrick"
+      },
+      "seq": 29
+    },
+    {
+      "action": {
+        "kind": {
+          "type": "Full"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 30
+    },
+    {
+      "action": {
+        "placement_id": 15,
+        "type": "PlaceBrick"
+      },
+      "seq": 31
+    },
+    {
+      "action": {
+        "kind": {
+          "length": 130.0,
+          "type": "Cut"
+        },
+        "type": "PickBrick"
+      },
+      "seq": 32
+    },
+    {
+      "action": {
+        "placement_id": 16,
+        "type": "PlaceBrick"
+      },
+      "seq": 33
+    }
+  ]
+}
