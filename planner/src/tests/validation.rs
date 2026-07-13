@@ -1,16 +1,16 @@
 use super::*;
 use crate::plan::plan;
-use crate::spec::PlanError;
+use crate::spec::{BrickDims, PlanError};
 
 #[test]
-fn accepts_plain_wall() {
-    assert_eq!(wall(2500.0, 2000.0).validate(), Ok(()));
+fn accepts_plain_room() {
+    assert_eq!(room(2500.0, 2000.0, 2000.0).validate(), Ok(()));
 }
 
 #[test]
 fn rejects_zero_wall_width() {
     assert_eq!(
-        wall(0.0, 2000.0).validate(),
+        room(0.0, 2000.0, 2000.0).validate(),
         Err(PlanError::InvalidDimension {
             field: "wall width".into()
         })
@@ -18,11 +18,11 @@ fn rejects_zero_wall_width() {
 }
 
 #[test]
-fn rejects_negative_wall_height() {
+fn rejects_negative_wall_length() {
     assert_eq!(
-        wall(2500.0, -1.0).validate(),
+        room(2500.0, -1.0, 2000.0).validate(),
         Err(PlanError::InvalidDimension {
-            field: "wall height".into()
+            field: "wall length".into()
         })
     );
 }
@@ -30,7 +30,7 @@ fn rejects_negative_wall_height() {
 #[test]
 fn rejects_non_finite_dimension() {
     assert_eq!(
-        wall(f64::NAN, 2000.0).validate(),
+        room(f64::NAN, 2000.0, 2000.0).validate(),
         Err(PlanError::InvalidDimension {
             field: "wall width".into()
         })
@@ -39,7 +39,7 @@ fn rejects_non_finite_dimension() {
 
 #[test]
 fn rejects_zero_joint() {
-    let mut spec = wall(2500.0, 2000.0);
+    let mut spec = room(2500.0, 2000.0, 2000.0);
     spec.joint = 0.0;
     assert_eq!(
         spec.validate(),
@@ -51,7 +51,7 @@ fn rejects_zero_joint() {
 
 #[test]
 fn rejects_non_positive_brick_dims() {
-    let mut spec = wall(2500.0, 2000.0);
+    let mut spec = room(2500.0, 2000.0, 2000.0);
     spec.brick.height = 0.0;
     assert_eq!(
         spec.validate(),
@@ -62,42 +62,73 @@ fn rejects_non_positive_brick_dims() {
 }
 
 #[test]
-fn rejects_wall_narrower_than_one_brick() {
+fn rejects_bricks_that_cannot_bond_at_corners() {
+    // Corner returns need length = 2 x width + joint; 200 breaks that.
+    let mut spec = room(2500.0, 2000.0, 2000.0);
+    spec.brick = BrickDims {
+        length: 200.0,
+        height: 50.0,
+        width: 100.0,
+    };
+    assert!(matches!(
+        spec.validate(),
+        Err(PlanError::InvalidDimension { field }) if field.starts_with("brick proportions")
+    ));
+}
+
+#[test]
+fn rejects_footprint_too_small_for_corner_returns() {
+    // Minimum extent is two corner returns (110 each) plus one minimum cut.
     assert_eq!(
-        wall(150.0, 2000.0).validate(),
+        room(250.0, 2000.0, 2000.0).validate(),
         Err(PlanError::WallSmallerThanBrick)
     );
+    assert_eq!(
+        room(2000.0, 250.0, 2000.0).validate(),
+        Err(PlanError::WallSmallerThanBrick)
+    );
+    assert_eq!(room(260.0, 260.0, 2000.0).validate(), Ok(()));
 }
 
 #[test]
 fn rejects_wall_shorter_than_one_brick() {
     assert_eq!(
-        wall(2500.0, 30.0).validate(),
+        room(2500.0, 2000.0, 30.0).validate(),
         Err(PlanError::WallSmallerThanBrick)
     );
 }
 
 #[test]
-fn rejects_opening_past_right_edge() {
-    let spec = with_opening(wall(2500.0, 2000.0), door(2000.0, 800.0, 1500.0));
+fn rejects_opening_past_the_corner_zone() {
+    // Front wall is 2500 wide; the last 110mm belong to the corner return.
+    let spec = with_opening(room(2500.0, 2000.0, 2000.0), door(1700.0, 800.0, 1500.0));
     assert_eq!(spec.validate(), Err(PlanError::OpeningOutOfBounds));
+}
+
+#[test]
+fn rejects_opening_in_the_left_corner_zone() {
+    let spec = with_opening(room(2500.0, 2000.0, 2000.0), door(50.0, 800.0, 1500.0));
+    assert_eq!(spec.validate(), Err(PlanError::OpeningOutOfBounds));
+}
+
+#[test]
+fn accepts_opening_flush_with_the_corner_return() {
+    let spec = with_opening(room(2500.0, 2000.0, 2000.0), door(110.0, 800.0, 1500.0));
+    assert_eq!(spec.validate(), Ok(()));
 }
 
 #[test]
 fn rejects_opening_above_wall_top() {
-    let spec = with_opening(wall(2500.0, 2000.0), window(500.0, 800.0, 1500.0, 600.0));
-    assert_eq!(spec.validate(), Err(PlanError::OpeningOutOfBounds));
-}
-
-#[test]
-fn rejects_opening_with_negative_x() {
-    let spec = with_opening(wall(2500.0, 2000.0), door(-10.0, 800.0, 1500.0));
+    let spec = with_opening(
+        room(2500.0, 2000.0, 2000.0),
+        window(500.0, 800.0, 1500.0, 600.0),
+    );
     assert_eq!(spec.validate(), Err(PlanError::OpeningOutOfBounds));
 }
 
 #[test]
 fn rejects_zero_width_opening() {
-    let spec = with_opening(wall(2500.0, 2000.0), door(500.0, 0.0, 1500.0));
+    let spec = with_opening(room(2500.0, 2000.0, 2000.0), door(500.0, 0.0, 1500.0));
     assert_eq!(
         spec.validate(),
         Err(PlanError::InvalidDimension {
@@ -107,15 +138,9 @@ fn rejects_zero_width_opening() {
 }
 
 #[test]
-fn accepts_opening_flush_with_left_edge() {
-    let spec = with_opening(wall(2500.0, 2000.0), door(0.0, 800.0, 1500.0));
-    assert_eq!(spec.validate(), Ok(()));
-}
-
-#[test]
 fn plan_surfaces_validation_errors() {
     assert_eq!(
-        plan(wall(100.0, 100.0)),
+        plan(room(100.0, 100.0, 100.0)),
         Err(PlanError::WallSmallerThanBrick)
     );
 }

@@ -194,12 +194,11 @@ header.masthead > p {
   color: var(--bg);
 }
 
-/* The SVG fills the content cell; the wall letterboxes inside it and
-   carries its own outline, so no CSS border here. */
-.wall-canvas {
-  display: block;
+/* The 3D viewport fills the content cell. */
+.scene-holder {
   width: 100%;
   height: 100%;
+  border: 1px solid var(--line);
 }
 
 .stats-line {
@@ -209,17 +208,6 @@ header.masthead > p {
   color: var(--ink-soft);
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
-}
-
-/* The brick that just landed settles from accent to its resting tone. */
-.brick.just-placed {
-  animation: settle 0.5s ease-out;
-}
-
-@keyframes settle {
-  from {
-    fill: var(--accent);
-  }
 }
 
 .playback-bar {

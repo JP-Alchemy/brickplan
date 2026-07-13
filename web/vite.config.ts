@@ -16,6 +16,10 @@ export default defineConfig({
     // The wasm-pack output must not be pre-bundled: esbuild would inline
     // the .wasm asset URL incorrectly.
     exclude: ['planner'],
+    // The scene modules load after the WASM top-level await, so the dev
+    // server would only discover these mid-load and re-optimize; list the
+    // deep three.js import up front to keep the module graph stable.
+    include: ['three/examples/jsm/controls/OrbitControls.js'],
   },
   server: {
     fs: {

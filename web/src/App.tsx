@@ -4,7 +4,7 @@ import InfoDialog from './components/InfoDialog';
 import PlanPanel from './components/PlanPanel';
 import PlaybackBar, { type Speed } from './components/PlaybackBar';
 import SpecControls, { type SpecDraft } from './components/SpecControls';
-import WallCanvas from './components/WallCanvas';
+import WallScene from './components/WallScene';
 import { planWall } from './planner';
 import type { PlanError, WallSpec } from './types';
 
@@ -19,6 +19,7 @@ const BASE_STEPS_PER_SECOND = 8;
 function draftToSpec(draft: SpecDraft): WallSpec {
   return {
     width: draft.wallWidth,
+    length: draft.wallLength,
     height: draft.wallHeight,
     brick: WAALFORMAAT,
     joint: JOINT,
@@ -41,7 +42,7 @@ function describeError(err: PlanError): string {
     case 'WallSmallerThanBrick':
       return 'the wall must fit at least one brick';
     case 'OpeningOutOfBounds':
-      return 'the opening extends outside the wall';
+      return 'the opening leaves the front wall or crosses a corner';
     case 'UnsupportedPlacement':
       return `planner invariant broken: placement ${err.placement_id} is unsupported`;
     case 'MalformedSpec':
@@ -52,6 +53,7 @@ function describeError(err: PlanError): string {
 export default function App() {
   const [draft, setDraft] = useState<SpecDraft>({
     wallWidth: 3000,
+    wallLength: 2200,
     wallHeight: 2400,
     openingKind: 'window',
     opening: { x: 1000, width: 800, sill: 600, height: 600 },
@@ -116,7 +118,7 @@ export default function App() {
       <div className="app-body">
         <section className="content">
           {plan ? (
-            <WallCanvas plan={plan} placedCount={Math.floor(clampedStep / 2)} />
+            <WallScene plan={plan} placedCount={Math.floor(clampedStep / 2)} />
           ) : (
             <div className="plan-error" role="alert">
               <p>No plan: {describeError(result.err!)}.</p>

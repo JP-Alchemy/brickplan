@@ -12,10 +12,15 @@ export interface OpeningDraft {
 
 export interface SpecDraft {
   wallWidth: number;
+  wallLength: number;
   wallHeight: number;
   openingKind: OpeningKind;
   opening: OpeningDraft;
 }
+
+/// The first 110mm at each end of the front wall belong to the corner
+/// return of the side walls; openings must stay clear of them.
+const CORNER_RETURN = 110;
 
 const OPENING_DEFAULTS: Record<'door' | 'window', Pick<OpeningDraft, 'sill' | 'height'>> = {
   door: { sill: 0, height: 2000 },
@@ -43,13 +48,20 @@ export default function SpecControls({ draft, onChange }: SpecControlsProps) {
 
   return (
     <div className="spec-controls">
-      <h2>Wall</h2>
+      <h2>Walls</h2>
       <SliderField
         label="Width"
         value={draft.wallWidth}
         min={500}
         max={6000}
         onChange={(wallWidth) => onChange({ wallWidth })}
+      />
+      <SliderField
+        label="Length"
+        value={draft.wallLength}
+        min={500}
+        max={6000}
+        onChange={(wallLength) => onChange({ wallLength })}
       />
       <SliderField
         label="Height"
@@ -59,7 +71,7 @@ export default function SpecControls({ draft, onChange }: SpecControlsProps) {
         onChange={(wallHeight) => onChange({ wallHeight })}
       />
 
-      <h2>Opening</h2>
+      <h2>Opening — front wall</h2>
       <div className="kind-toggle" role="group" aria-label="Opening type">
         {(['none', 'door', 'window'] as const).map((kind) => (
           <button
@@ -76,7 +88,7 @@ export default function SpecControls({ draft, onChange }: SpecControlsProps) {
           <SliderField
             label="Position"
             value={opening.x}
-            min={0}
+            min={CORNER_RETURN}
             max={draft.wallWidth}
             onChange={(x) => patchOpening({ x })}
           />

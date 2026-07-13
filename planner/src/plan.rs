@@ -25,7 +25,7 @@ pub struct Plan {
 /// Turn a wall spec into an executable plan: validate, lay out, sequence.
 pub fn plan(spec: WallSpec) -> Result<Plan, PlanError> {
     spec.validate()?;
-    let placements = crate::layout::layout_wall(&spec);
+    let placements = crate::layout::layout_walls(&spec);
     let steps = crate::sequence::sequence(&spec, &placements)?;
     let stats = PlanStats {
         courses: crate::layout::course_count(&spec),

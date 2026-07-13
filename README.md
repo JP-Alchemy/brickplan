@@ -1,8 +1,9 @@
 # BrickPlan
 
-Define a wall. A Rust planner — compiled to WebAssembly, running in your
-browser — turns it into a brick-by-brick placement plan as plain JSON. A
-React simulator executes the plan, one step at a time.
+Define a small building — four walls on a rectangular footprint, with a
+door or window in the front. A Rust planner — compiled to WebAssembly,
+running in your browser — turns it into a brick-by-brick placement plan
+as plain JSON. A React simulator builds the plan in 3D, one step at a time.
 
 Live at [jp-alchemy.github.io/brickplan](https://jp-alchemy.github.io/brickplan/).
 
@@ -14,14 +15,14 @@ opening, no physics — but the architecture is the real thing in miniature.
 ## Architecture
 
 ```
-  WallSpec (dimensions, brick, joint, optional opening)
+  WallSpec (footprint, height, brick, joint, optional opening)
       |
       v
   planner/ ................. Rust crate, pure functions
-      |   layout.rs          stretcher bond, cut bricks, openings
-      |   sequence.rs        bottom-up ordering + support-rule validation
-      |   lib.rs             the only WASM-facing code
-      |
+      |   layout.rs          stretcher bond on four walls, corner
+      |   sequence.rs        returns, cut bricks, openings; then
+      |   lib.rs             bottom-up ordering + support validation;
+      |                      lib.rs is the only WASM-facing code
       |   compiled natively  -> cargo test, no WASM tooling needed
       |   compiled to WASM   -> runs live in the browser
       v
@@ -29,11 +30,25 @@ opening, no physics — but the architecture is the real thing in miniature.
       |
       v
   web/ ..................... Vite + React + TypeScript
-          WallCanvas         SVG simulator replaying the step list
+          WallScene          react-three-fiber simulator: one instanced
+                             mesh, playback just moves the draw count
           SpecControls       edit the spec; every change re-plans (<10ms)
           PlaybackBar        play / scrub / 1-4-16x
           PlanPanel          the raw plan, visible and downloadable
 ```
+
+## Corners
+
+Corners are where bonds earn their keep. The planner alternates which
+pair of walls "runs through" to the outer corner each course: front and
+back on even courses, the sides on odd ones. The receding wall starts one
+corner return — brick width plus a joint, 110mm — in from the corner.
+Waalformaat bricks are proportioned so that this return is exactly half
+the bond module (210 = 2 x 100 + 10), so the alternation *is* the
+stretcher stagger: every vertical joint, including those at the corners,
+lands mid-brick on the courses above and below, with no corner cuts. The
+planner rejects brick dimensions that break this proportion rather than
+quietly emitting corners that don't line up.
 
 The planner never draws and the simulator never plans. Everything that
 crosses between them is serializable data, so the same plan that animates
@@ -54,6 +69,9 @@ A real masonry planner would treat each of these differently:
 
 - **One bond pattern.** Stretcher bond only. Flemish, English, or header
   bonds would turn the per-course layout into a strategy the spec selects.
+- **One opening, front wall only.** And it must stay clear of the corner
+  returns; the planner rejects anything else. Openings per wall would be
+  a spec change, not an engine change.
 - **Naive lintels.** The course above an opening spans it uninterrupted,
   and the support check knowingly accepts bricks resting on that gap. A
   real wall gets a lintel element with its own placement and lead time.
@@ -87,10 +105,13 @@ The interesting properties are all covered natively — no WASM tooling in
 the test loop:
 
 - course counts as a function of wall, brick, and joint dimensions
-- pairwise non-overlap of placements; nothing intersects an opening
+- corners alternate their through-wall and land on the half-module stagger
+- pairwise plan-view non-overlap per course, across all four walls
 - cut bricks land flush against opening edges; no cut below the minimum
-- the support rule rejects fabricated floating bricks
-- spec validation errors (zero dims, out-of-bounds openings) fire correctly
+- the support rule rejects floating bricks and accepts corner bricks
+  resting on the perpendicular wall below
+- spec validation errors (zero dims, out-of-bounds or corner-crossing
+  openings, un-bondable brick proportions) fire correctly
 - a committed JSON fixture pins the wire format — the same shape the WASM
   boundary emits (regenerate intentionally with `UPDATE_FIXTURES=1 cargo test`)
 
@@ -103,8 +124,7 @@ is fully static — any static host works.
 
 ## Future work
 
-- A small 3D visualizer (React Three Fiber) reading the same plan — the
-  cleanest demonstration that the plan, not the renderer, is the product.
+- Openings on any wall, and more than one per wall.
 - Alternative bond patterns as planner strategies.
 - Robot-flavored constraints: reachability windows, cure-time-aware
   sequencing, replanning after a failed placement.

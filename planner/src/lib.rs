@@ -7,6 +7,7 @@ pub mod plan;
 pub mod sequence;
 pub mod spec;
 
+pub use layout::{BrickKind, Placement, WallSide};
 pub use plan::{Plan, PlanStats, plan};
 pub use spec::{BrickDims, Opening, PlanError, WallSpec};
 

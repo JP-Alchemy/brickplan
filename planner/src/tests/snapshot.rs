@@ -7,7 +7,7 @@ use crate::spec::PlanError;
 #[test]
 fn plan_result_envelope_serializes_as_ok_or_err() {
     let ok = PlanResult::Ok {
-        ok: plan(wall(900.0, 230.0)).unwrap(),
+        ok: plan(room(700.0, 560.0, 170.0)).unwrap(),
     };
     let ok_json = serde_json::to_value(&ok).unwrap();
     assert!(ok_json.get("ok").is_some_and(|p| p.get("steps").is_some()));
@@ -28,7 +28,7 @@ fn plan_result_envelope_serializes_as_ok_or_err() {
 /// and review the fixture diff before committing.
 #[test]
 fn small_plan_serializes_to_the_committed_fixture() {
-    let spec = with_opening(wall(900.0, 230.0), door(340.0, 220.0, 170.0));
+    let spec = with_opening(room(700.0, 560.0, 170.0), door(230.0, 220.0, 170.0));
     let plan = plan(spec).unwrap();
     let actual = serde_json::to_value(&plan).unwrap();
     let path = concat!(

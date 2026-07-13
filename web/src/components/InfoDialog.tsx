@@ -35,9 +35,9 @@ export default function InfoDialog() {
               &ldquo;Plans as Data&rdquo;
             </a>{' '}
             idea. A Rust planner — compiled to WebAssembly, running entirely in your browser —
-            turns a wall specification into a step-by-step placement plan as plain JSON, and this
-            page replays that plan the way a robot would execute it. Nothing leaves your machine;
-            there is no backend.{' '}
+            turns four walls and an opening into a step-by-step placement plan as plain JSON, and
+            this page builds that plan the way a robot would execute it. Nothing leaves your
+            machine; there is no backend.{' '}
             <a href="https://github.com/JP-Alchemy/brickplan" target="_blank" rel="noreferrer">
               Source on GitHub
             </a>
@@ -45,13 +45,14 @@ export default function InfoDialog() {
           </p>
           <h2>How to use</h2>
           <ul>
-            <li>Shape the wall with the sliders — every change re-plans instantly.</li>
-            <li>Add a door or window; bricks are cut to land flush against it.</li>
+            <li>Shape the walls with the sliders — every change re-plans instantly.</li>
+            <li>Add a door or window to the front wall; bricks are cut to land flush against it.</li>
+            <li>Drag to orbit, scroll to zoom — the corners are worth a close look.</li>
             <li>Press Play to watch the placement sequence, scrub freely, change speed.</li>
             <li>Open &ldquo;Plan JSON&rdquo; to inspect the raw plan, or download all of it.</li>
             <li>
-              Ask for something unbuildable — an opening past the wall&rsquo;s edge, say — and the
-              planner will tell you no.
+              Ask for something unbuildable — an opening crossing a corner, say — and the planner
+              will tell you no.
             </li>
           </ul>
           <button className="info-close" onClick={() => ref.current?.close()}>

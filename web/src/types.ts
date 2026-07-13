@@ -17,6 +17,7 @@ export interface Opening {
 
 export interface WallSpec {
   width: number;
+  length: number;
   height: number;
   brick: BrickDims;
   joint: number;
@@ -28,12 +29,16 @@ export type BrickKind =
   | { type: 'Half' }
   | { type: 'Cut'; length: number };
 
+export type WallSide = 'South' | 'East' | 'North' | 'West';
+
 export interface Placement {
   id: number;
   course: number;
+  wall: WallSide;
   kind: BrickKind;
   x: number;
   y: number;
+  z: number;
 }
 
 export type Action =
