@@ -23,3 +23,8 @@ dev: wasm
 # Production build into web/dist
 build: wasm
     cd web && npm run build
+
+# Deploy: push main; the ci workflow tests, builds, and publishes to
+# GitHub Pages (see .github/workflows/ci.yml)
+deploy: test lint build
+    git push origin main

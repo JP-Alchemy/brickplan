@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import PlanPanel from './components/PlanPanel';
 import PlaybackBar, { type Speed } from './components/PlaybackBar';
 import SpecControls, { type SpecDraft } from './components/SpecControls';
 import WallCanvas from './components/WallCanvas';
@@ -74,6 +75,10 @@ export default function App() {
   const plan = result.ok ?? null;
   const totalSteps = plan?.steps.length ?? 0;
 
+  // Editing the spec keeps the playback position; a shorter plan clamps it.
+  // Clamping is derived rather than stored, so no state cascades on edit.
+  const clampedStep = Math.min(stepIndex, totalSteps);
+
   // The step index is derived from elapsed time, not incremented per tick:
   // playback speed stays correct even when the browser throttles timers,
   // and high speeds advance several steps per frame.
@@ -81,25 +86,22 @@ export default function App() {
     if (!playing) return;
     const rate = BASE_STEPS_PER_SECOND * speed;
     const startedAt = performance.now();
-    const startStep = stepIndexRef.current;
+    const startStep = Math.min(stepIndexRef.current, totalSteps);
     const timer = setInterval(() => {
       const elapsed = (performance.now() - startedAt) / 1000;
-      setStepIndex(Math.min(startStep + Math.floor(elapsed * rate), totalSteps));
+      const next = startStep + Math.floor(elapsed * rate);
+      if (next >= totalSteps) {
+        setStepIndex(totalSteps);
+        setPlaying(false); // reached the end of the plan
+      } else {
+        setStepIndex(next);
+      }
     }, 33);
     return () => clearInterval(timer);
   }, [playing, speed, totalSteps]);
 
-  useEffect(() => {
-    if (stepIndex >= totalSteps) setPlaying(false);
-  }, [stepIndex, totalSteps]);
-
-  // Editing the spec keeps the playback position, clamped to the new plan.
-  useEffect(() => {
-    if (stepIndexRef.current > totalSteps) setStepIndex(totalSteps);
-  }, [totalSteps]);
-
   const togglePlay = () => {
-    if (!playing && stepIndex >= totalSteps) setStepIndex(0); // replay from the start
+    if (!playing && clampedStep >= totalSteps) setStepIndex(0); // replay from the start
     setPlaying(!playing);
   };
 
@@ -113,9 +115,9 @@ export default function App() {
         <div className="stage">
           {plan ? (
             <>
-              <WallCanvas plan={plan} placedCount={Math.floor(stepIndex / 2)} />
+              <WallCanvas plan={plan} placedCount={Math.floor(clampedStep / 2)} />
               <PlaybackBar
-                stepIndex={stepIndex}
+                stepIndex={clampedStep}
                 totalSteps={totalSteps}
                 playing={playing}
                 speed={speed}
@@ -132,6 +134,7 @@ export default function App() {
                 {plan.stats.half_bricks} half, {plan.stats.cut_bricks} cut) · {plan.steps.length}{' '}
                 steps
               </p>
+              <PlanPanel plan={plan} />
             </>
           ) : (
             <div className="plan-error" role="alert">
