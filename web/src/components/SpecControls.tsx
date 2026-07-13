@@ -42,7 +42,7 @@ export default function SpecControls({ draft, onChange }: SpecControlsProps) {
   };
 
   return (
-    <aside className="spec-controls">
+    <div className="spec-controls">
       <h2>Wall</h2>
       <SliderField
         label="Width"
@@ -105,7 +105,7 @@ export default function SpecControls({ draft, onChange }: SpecControlsProps) {
           )}
         </>
       )}
-    </aside>
+    </div>
   );
 }
 

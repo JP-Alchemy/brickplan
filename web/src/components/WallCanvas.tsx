@@ -34,7 +34,18 @@ export default function WallCanvas({ plan, placedCount }: WallCanvasProps) {
       role="img"
       aria-label={`Brick wall, ${spec.width} by ${spec.height} millimeters`}
     >
-      <rect x={0} y={0} width={spec.width} height={spec.height} fill="var(--mortar)" />
+      {/* The wall outline lives inside the SVG so it hugs the wall even
+          when the canvas letterboxes; the stroke stays 1px on screen. */}
+      <rect
+        x={0}
+        y={0}
+        width={spec.width}
+        height={spec.height}
+        fill="var(--mortar)"
+        stroke="var(--line)"
+        strokeWidth={1}
+        vectorEffect="non-scaling-stroke"
+      />
       {spec.opening && (
         <rect
           x={spec.opening.x}

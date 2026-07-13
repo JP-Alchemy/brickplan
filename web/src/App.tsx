@@ -113,40 +113,50 @@ export default function App() {
         <p>a wall spec becomes a plan becomes a wall</p>
         <InfoDialog />
       </header>
-      <div className="layout">
-        <div className="stage">
+      <div className="app-body">
+        <section className="content">
           {plan ? (
-            <>
-              <WallCanvas plan={plan} placedCount={Math.floor(clampedStep / 2)} />
-              <PlaybackBar
-                stepIndex={clampedStep}
-                totalSteps={totalSteps}
-                playing={playing}
-                speed={speed}
-                onTogglePlay={togglePlay}
-                onScrub={(i) => {
-                  setPlaying(false);
-                  setStepIndex(i);
-                }}
-                onSpeedChange={setSpeed}
-              />
-              <p className="stats-line">
-                {plan.spec.width} × {plan.spec.height} mm · {plan.stats.courses} courses ·{' '}
-                {plan.placements.length} bricks ({plan.stats.full_bricks} full,{' '}
-                {plan.stats.half_bricks} half, {plan.stats.cut_bricks} cut) · {plan.steps.length}{' '}
-                steps
-              </p>
-              <PlanPanel plan={plan} />
-            </>
+            <WallCanvas plan={plan} placedCount={Math.floor(clampedStep / 2)} />
           ) : (
             <div className="plan-error" role="alert">
               <p>No plan: {describeError(result.err!)}.</p>
               <p>Adjust the spec — the planner rejects anything it cannot build.</p>
             </div>
           )}
-        </div>
-        <SpecControls draft={draft} onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))} />
+        </section>
+        <aside className="sidebar">
+          <SpecControls
+            draft={draft}
+            onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))}
+          />
+          {plan && (
+            <>
+              <p className="stats-line">
+                {plan.stats.courses} courses · {plan.placements.length} bricks (
+                {plan.stats.full_bricks} full, {plan.stats.half_bricks} half,{' '}
+                {plan.stats.cut_bricks} cut) · {plan.steps.length} steps
+              </p>
+              <PlanPanel plan={plan} />
+            </>
+          )}
+        </aside>
       </div>
+      {plan && (
+        <footer className="playback-footer">
+          <PlaybackBar
+            stepIndex={clampedStep}
+            totalSteps={totalSteps}
+            playing={playing}
+            speed={speed}
+            onTogglePlay={togglePlay}
+            onScrub={(i) => {
+              setPlaying(false);
+              setStepIndex(i);
+            }}
+            onSpeedChange={setSpeed}
+          />
+        </footer>
+      )}
     </main>
   );
 }

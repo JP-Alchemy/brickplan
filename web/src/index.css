@@ -25,20 +25,59 @@
   margin: 0;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
-  min-height: 100vh;
+  overflow: hidden;
 }
 
 #root {
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 2.5rem 2rem;
+  padding: 1rem;
 }
 
-/* The whole app sits in one bordered frame, sectioned by rules —
-   the drafting-sheet grid of monumental.co's homepage. */
+/* The whole app is one bordered frame filling the window, sectioned by
+   rules — the drafting-sheet grid of monumental.co's homepage. Header
+   and footer pin to the frame's edges; only the sidebar scrolls. */
 .app-frame {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--line);
+}
+
+.app-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.sidebar {
+  width: 17rem;
+  flex-shrink: 0;
+  border-left: 1px solid var(--line);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.playback-footer {
+  flex: none;
+  border-top: 1px solid var(--line);
+  padding: 0.9rem 1.5rem;
 }
 
 header.masthead {
@@ -62,17 +101,6 @@ header.masthead > p {
   font-style: italic;
   font-size: 1.05rem;
   color: var(--wine);
-}
-
-.layout {
-  display: flex;
-  align-items: stretch;
-}
-
-.stage {
-  flex: 1;
-  min-width: 0;
-  padding: 1.5rem;
 }
 
 .info-button {
@@ -166,18 +194,20 @@ header.masthead > p {
   color: var(--bg);
 }
 
+/* The SVG fills the content cell; the wall letterboxes inside it and
+   carries its own outline, so no CSS border here. */
 .wall-canvas {
   display: block;
   width: 100%;
-  height: auto;
-  border: 1px solid var(--line);
-  background: var(--bg);
+  height: 100%;
 }
 
 .stats-line {
-  margin-top: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hairline);
   color: var(--ink-soft);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -196,9 +226,6 @@ header.masthead > p {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 1.25rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--hairline);
 }
 
 .playback-bar button {
@@ -252,9 +279,10 @@ header.masthead > p {
   text-align: right;
 }
 
+/* Pinned to the sidebar's bottom edge. */
 .plan-panel {
-  margin-top: 1.5rem;
-  border-top: 1px solid var(--hairline);
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 .plan-panel summary {
@@ -277,11 +305,11 @@ header.masthead > p {
 
 .plan-panel pre {
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   line-height: 1.45;
   border: 1px solid var(--line);
-  padding: 1rem;
-  max-height: 22rem;
+  padding: 0.75rem;
+  max-height: 14rem;
   overflow: auto;
 }
 
@@ -302,6 +330,7 @@ header.masthead > p {
 }
 
 .plan-error {
+  max-width: 26rem;
   border: 1px solid var(--line);
   border-left: 3px solid var(--accent);
   padding: 1.5rem;
@@ -316,13 +345,6 @@ header.masthead > p {
   margin-top: 0.25rem;
   color: var(--ink-soft);
   font-size: 0.85rem;
-}
-
-.spec-controls {
-  width: 16rem;
-  flex-shrink: 0;
-  padding: 1.5rem;
-  border-left: 1px solid var(--line);
 }
 
 .spec-controls h2 {
