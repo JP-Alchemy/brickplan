@@ -69,3 +69,77 @@ header.masthead p {
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
+
+/* The brick that just landed settles from accent to its resting grey. */
+.brick.just-placed {
+  animation: settle 0.5s ease-out;
+}
+
+@keyframes settle {
+  from {
+    fill: var(--accent);
+  }
+}
+
+.playback-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.playback-bar button {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--hairline);
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+}
+
+.playback-bar button:hover {
+  border-color: var(--ink-soft);
+}
+
+.play-toggle {
+  min-width: 4.5rem;
+}
+
+.speed-toggle {
+  display: flex;
+}
+
+.speed-toggle button {
+  border-left-width: 0;
+  min-width: 2.75rem;
+}
+
+.speed-toggle button:first-child {
+  border-left-width: 1px;
+}
+
+.speed-toggle button.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  border-left-width: 1px;
+}
+
+.speed-toggle button.active + button {
+  border-left-width: 0;
+}
+
+.playback-bar input[type='range'] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.step-counter {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 9rem;
+  text-align: right;
+}

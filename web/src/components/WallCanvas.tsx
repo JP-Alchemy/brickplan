@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { brickLength } from '../geometry';
 import type { Plan } from '../types';
 
@@ -6,11 +8,24 @@ import type { Plan } from '../types';
 
 interface WallCanvasProps {
   plan: Plan;
+  /** How many bricks are on the wall at the current playback position. */
+  placedCount: number;
 }
 
-export default function WallCanvas({ plan }: WallCanvasProps) {
-  const { spec, placements } = plan;
+export default function WallCanvas({ plan, placedCount }: WallCanvasProps) {
+  const { spec } = plan;
   const margin = 20;
+
+  // Replay order comes from the steps, not from the placements array:
+  // the plan is the contract, and the simulator only executes it.
+  const placeOrder = useMemo(() => {
+    const byId = new Map(plan.placements.map((p) => [p.id, p]));
+    return plan.steps.flatMap((s) =>
+      s.action.type === 'PlaceBrick' ? [byId.get(s.action.placement_id)!] : [],
+    );
+  }, [plan]);
+
+  const visible = placeOrder.slice(0, placedCount);
 
   return (
     <svg
@@ -31,9 +46,10 @@ export default function WallCanvas({ plan }: WallCanvasProps) {
           strokeWidth={2}
         />
       )}
-      {placements.map((p) => (
+      {visible.map((p, i) => (
         <rect
           key={p.id}
+          className={i === placedCount - 1 ? 'brick just-placed' : 'brick'}
           x={p.x}
           y={spec.height - p.y - spec.brick.height}
           width={brickLength(p.kind, spec)}
