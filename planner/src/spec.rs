@@ -67,6 +67,8 @@ pub enum PlanError {
     OpeningOutOfBounds,
     #[error("placement {placement_id} has no support below it")]
     UnsupportedPlacement { placement_id: u32 },
+    #[error("spec could not be parsed: {message}")]
+    MalformedSpec { message: String },
 }
 
 impl WallSpec {

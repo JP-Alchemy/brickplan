@@ -1,4 +1,7 @@
 target/
 node_modules/
 dist/
+planner/pkg/
+.claude/
 .DS_Store
+*.tsbuildinfo

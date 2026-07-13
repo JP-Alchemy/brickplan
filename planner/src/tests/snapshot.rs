@@ -1,5 +1,27 @@
 use super::*;
+use crate::PlanResult;
 use crate::plan::plan;
+use crate::spec::PlanError;
+
+/// The boundary envelope is part of the wire format too.
+#[test]
+fn plan_result_envelope_serializes_as_ok_or_err() {
+    let ok = PlanResult::Ok {
+        ok: plan(wall(900.0, 230.0)).unwrap(),
+    };
+    let ok_json = serde_json::to_value(&ok).unwrap();
+    assert!(ok_json.get("ok").is_some_and(|p| p.get("steps").is_some()));
+
+    let err = PlanResult::Err {
+        err: PlanError::MalformedSpec {
+            message: "bad".into(),
+        },
+    };
+    assert_eq!(
+        serde_json::to_value(&err).unwrap(),
+        serde_json::json!({ "err": { "kind": "MalformedSpec", "message": "bad" } })
+    );
+}
 
 /// Guards the wire format: the UI and any future consumer parse this JSON.
 /// On an intentional format change, run `UPDATE_FIXTURES=1 cargo test`
