@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import InfoDialog from './components/InfoDialog';
 import PlanPanel from './components/PlanPanel';
 import PlaybackBar, { type Speed } from './components/PlaybackBar';
 import SpecControls, { type SpecDraft } from './components/SpecControls';
@@ -110,6 +111,7 @@ export default function App() {
       <header className="masthead">
         <h1>BrickPlan</h1>
         <p>a wall spec becomes a plan becomes a wall</p>
+        <InfoDialog />
       </header>
       <div className="layout">
         <div className="stage">

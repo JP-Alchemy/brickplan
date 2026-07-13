@@ -66,6 +66,92 @@ header.masthead p {
   font-size: 0.85rem;
 }
 
+.info-button {
+  margin-left: auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.info-button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.info-dialog {
+  margin: auto;
+  max-width: 30rem;
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+  color: var(--ink);
+  padding: 0;
+}
+
+.info-dialog::backdrop {
+  background: rgba(33, 30, 26, 0.35);
+}
+
+.info-body {
+  padding: 2rem;
+}
+
+.info-body h2 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  margin-bottom: 0.5rem;
+}
+
+.info-body h2 + h2,
+.info-body p + h2,
+.info-body ul + h2 {
+  margin-top: 1.5rem;
+}
+
+.info-body p,
+.info-body li {
+  font-size: 0.9rem;
+}
+
+.info-body ul {
+  padding-left: 1.1rem;
+}
+
+.info-body li + li {
+  margin-top: 0.35rem;
+}
+
+.info-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.info-close {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--hairline);
+  padding: 0.25rem 0.75rem;
+  margin-top: 1.5rem;
+  cursor: pointer;
+}
+
+.info-close:hover {
+  border-color: var(--ink-soft);
+}
+
 .wall-canvas {
   display: block;
   width: 100%;
