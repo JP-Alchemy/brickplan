@@ -4,6 +4,8 @@ Define a wall. A Rust planner — compiled to WebAssembly, running in your
 browser — turns it into a brick-by-brick placement plan as plain JSON. A
 React simulator executes the plan, one step at a time.
 
+Live at [jp-alchemy.github.io/brickplan](https://jp-alchemy.github.io/brickplan/).
+
 Built after reading Monumental's ["Plans as Data"](https://buildmonumental.substack.com/p/plans-as-data)
 post, to feel the shared Rust/WASM stack idea firsthand rather than just nod
 at it. It is a deliberately small homage, not a clone: one bond pattern, one
