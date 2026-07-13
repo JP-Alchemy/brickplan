@@ -2,9 +2,10 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { WebGPURenderer } from 'three/webgpu';
 
 import { brickLength } from '../geometry';
-import type { Plan, Placement } from '../types';
+import type { Plan, Placement, WallSpec } from '../types';
 
 // Materials cannot read CSS variables, so the palette is mirrored here.
 const COLORS = {
@@ -13,6 +14,8 @@ const COLORS = {
   brick: '#c1b7a4',
   cut: '#d6cdba',
   accent: '#f74823',
+  ink: '#1a024d',
+  wine: '#721e3c',
 };
 
 // The planner speaks millimeters; the scene is in meters. Plan x maps to
@@ -30,17 +33,33 @@ export default function WallScene({ plan, placedCount }: WallSceneProps) {
   const maxDim = Math.max(spec.width, spec.length, spec.height) * MM;
   return (
     <div className="scene-holder">
-      {/* Camera starts on the -z side so the front wall (and its opening)
-          faces the viewer. */}
-      <Canvas camera={{ fov: 40, position: [maxDim * 1.4, maxDim * 1.05, -maxDim * 1.8] }}>
+      {/* WebGPU when the browser has it, WebGL otherwise (the renderer
+          falls back by itself). frameloop="demand" renders only when the
+          camera moves or the plan/playback changes — idle cost is zero. */}
+      <Canvas
+        frameloop="demand"
+        gl={async (props) => {
+          const renderer = new WebGPURenderer({
+            ...(props as ConstructorParameters<typeof WebGPURenderer>[0]),
+            antialias: true,
+          });
+          await renderer.init();
+          return renderer;
+        }}
+        // Camera starts on the -z side so the front wall (and its opening)
+        // faces the viewer.
+        camera={{ fov: 40, position: [maxDim * 1.4, maxDim * 1.05, -maxDim * 1.8] }}
+      >
         <color attach="background" args={[COLORS.bg]} />
         <ambientLight intensity={1.6} />
-        <directionalLight position={[4, 8, 6]} intensity={1.8} />
-        <directionalLight position={[-6, 3, -4]} intensity={0.7} />
+        <directionalLight position={[4, 8, -6]} intensity={1.8} />
+        <directionalLight position={[-6, 3, 4]} intensity={0.7} />
         <Controls targetY={(spec.height * MM) / 2} />
         <Bricks plan={plan} placedCount={placedCount} />
+        <Ghost spec={spec} />
+        {/* The floor is exactly the building's footprint. */}
         <mesh rotation-x={-Math.PI / 2} position-y={-0.002}>
-          <planeGeometry args={[maxDim * 8, maxDim * 8]} />
+          <planeGeometry args={[spec.width * MM, spec.length * MM]} />
           <meshBasicMaterial color={COLORS.ground} />
         </mesh>
       </Canvas>
@@ -51,13 +70,15 @@ export default function WallScene({ plan, placedCount }: WallSceneProps) {
 /// Hand-rolled orbit controls: three's own OrbitControls wired into the
 /// fiber camera, kept dependency-free (no drei).
 function Controls({ targetY }: { targetY: number }) {
-  const { camera, gl } = useThree();
+  const { camera, gl, invalidate } = useThree();
   const controlsRef = useRef<OrbitControls | null>(null);
   useEffect(() => {
     const controls = new OrbitControls(camera, gl.domElement);
+    // In demand mode, camera movement must ask for a frame explicitly.
+    controls.addEventListener('change', () => invalidate());
     controlsRef.current = controls;
     return () => controls.dispose();
-  }, [camera, gl]);
+  }, [camera, gl, invalidate]);
   useEffect(() => {
     const controls = controlsRef.current;
     if (controls) {
@@ -66,6 +87,58 @@ function Controls({ targetY }: { targetY: number }) {
     }
   }, [targetY]);
   return null;
+}
+
+/// Where the build is heading: a wireframe of the target envelope, and
+/// the opening marked in the front wall before any brick reaches it.
+function Ghost({ spec }: { spec: WallSpec }) {
+  const envelope = useMemo(
+    () =>
+      new THREE.EdgesGeometry(
+        new THREE.BoxGeometry(spec.width * MM, spec.height * MM, spec.length * MM),
+      ),
+    [spec.width, spec.height, spec.length],
+  );
+  const opening = useMemo(
+    () =>
+      spec.opening
+        ? new THREE.EdgesGeometry(
+            new THREE.BoxGeometry(
+              spec.opening.width * MM,
+              spec.opening.height * MM,
+              spec.brick.width * MM,
+            ),
+          )
+        : null,
+    [spec.opening, spec.brick.width],
+  );
+  const op = spec.opening;
+  return (
+    <group>
+      <lineSegments geometry={envelope} position={[0, (spec.height * MM) / 2, 0]}>
+        <lineBasicMaterial color={COLORS.ink} transparent opacity={0.3} />
+      </lineSegments>
+      {op && opening && (
+        <group
+          position={[
+            (op.x + op.width / 2) * MM - (spec.width * MM) / 2,
+            (op.sill_height + op.height / 2) * MM,
+            (spec.brick.width * MM) / 2 - (spec.length * MM) / 2,
+          ]}
+        >
+          <lineSegments geometry={opening}>
+            <lineBasicMaterial color={COLORS.wine} transparent opacity={0.55} />
+          </lineSegments>
+          <mesh>
+            <boxGeometry
+              args={[op.width * MM, op.height * MM, (spec.brick.width * MM) * 0.98]}
+            />
+            <meshBasicMaterial color={COLORS.wine} transparent opacity={0.07} depthWrite={false} />
+          </mesh>
+        </group>
+      )}
+    </group>
+  );
 }
 
 function baseColor(p: Placement): string {
@@ -77,6 +150,7 @@ function baseColor(p: Placement): string {
 /// multi-thousand-step plan costs nothing.
 function Bricks({ plan, placedCount }: WallSceneProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
+  const invalidate = useThree((state) => state.invalidate);
   const { spec } = plan;
 
   // Replay order comes from the steps, not the placements array: the
@@ -115,7 +189,8 @@ function Bricks({ plan, placedCount }: WallSceneProps) {
     });
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [placeOrder, spec]);
+    invalidate();
+  }, [placeOrder, spec, invalidate]);
 
   // Playback: draw the first placedCount instances, most recent in accent.
   const prevLast = useRef(-1);
@@ -134,7 +209,8 @@ function Bricks({ plan, placedCount }: WallSceneProps) {
     prevLast.current = last;
     mesh.count = placedCount;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [placedCount, placeOrder]);
+    invalidate();
+  }, [placedCount, placeOrder, invalidate]);
 
   return (
     <instancedMesh

@@ -30,8 +30,9 @@ opening, no physics — but the architecture is the real thing in miniature.
       |
       v
   web/ ..................... Vite + React + TypeScript
-          WallScene          react-three-fiber simulator: one instanced
-                             mesh, playback just moves the draw count
+          WallScene          react-three-fiber on WebGPU (WebGL fallback):
+                             one instanced mesh, playback just moves the
+                             draw count, frames render only on demand
           SpecControls       edit the spec; every change re-plans (<10ms)
           PlaybackBar        play / scrub / 1-4-16x
           PlanPanel          the raw plan, visible and downloadable
