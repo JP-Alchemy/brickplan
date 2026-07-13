@@ -32,9 +32,20 @@ body {
 }
 
 #root {
-  max-width: 60rem;
+  max-width: 68rem;
   margin: 0 auto;
   padding: 3rem 2rem;
+}
+
+.layout {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+}
+
+.stage {
+  flex: 1;
+  min-width: 0;
 }
 
 header.masthead {
@@ -142,4 +153,117 @@ header.masthead p {
   font-variant-numeric: tabular-nums;
   min-width: 9rem;
   text-align: right;
+}
+
+.plan-error {
+  border: 1px solid var(--hairline);
+  border-left: 2px solid var(--accent);
+  padding: 1.5rem;
+}
+
+.plan-error p:first-child {
+  color: var(--accent);
+}
+
+.plan-error p + p {
+  margin-top: 0.25rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.spec-controls {
+  width: 15rem;
+  flex-shrink: 0;
+}
+
+.spec-controls h2 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  margin-bottom: 0.75rem;
+}
+
+.spec-controls h2 + h2,
+.spec-controls .field + h2,
+.kind-toggle + .field {
+  margin-top: 1rem;
+}
+
+.spec-controls > h2:not(:first-child) {
+  margin-top: 2rem;
+}
+
+.field + .field {
+  margin-top: 0.9rem;
+}
+
+.field-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.85rem;
+}
+
+.field-value {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.field-value input[type='number'] {
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  width: 3.6rem;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  background: none;
+  text-align: right;
+  margin-right: 0.3rem;
+}
+
+.field-value input[type='number']:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+
+.field input[type='range'] {
+  width: 100%;
+  margin-top: 0.35rem;
+  accent-color: var(--accent);
+}
+
+.kind-toggle {
+  display: flex;
+}
+
+.kind-toggle button {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--hairline);
+  border-left-width: 0;
+  padding: 0.25rem 0;
+  flex: 1;
+  cursor: pointer;
+}
+
+.kind-toggle button:first-child {
+  border-left-width: 1px;
+}
+
+.kind-toggle button:hover {
+  border-color: var(--ink-soft);
+}
+
+.kind-toggle button.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  border-left-width: 1px;
+}
+
+.kind-toggle button.active + button {
+  border-left-width: 0;
 }

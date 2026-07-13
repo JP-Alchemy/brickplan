@@ -1,25 +1,59 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import PlaybackBar, { type Speed } from './components/PlaybackBar';
+import SpecControls, { type SpecDraft } from './components/SpecControls';
 import WallCanvas from './components/WallCanvas';
 import { planWall } from './planner';
-import type { WallSpec } from './types';
+import type { PlanError, WallSpec } from './types';
 
-// M4: playback over a hardcoded spec. Live editing follows.
-const demoSpec: WallSpec = {
-  width: 3000,
-  height: 2400,
-  brick: { length: 210, height: 50, width: 100 },
-  joint: 10,
-  opening: { x: 1000, width: 800, sill_height: 600, height: 600 },
-};
-
-const result = planWall(demoSpec);
+// NL waalformaat; brick size is deliberately not editable — the demo is
+// about the wall, and the planner treats brick dims as data regardless.
+const WAALFORMAAT = { length: 210, height: 50, width: 100 };
+const JOINT = 10;
 
 // Steps per second at 1×; a pick and a place both count as one step.
 const BASE_STEPS_PER_SECOND = 8;
 
+function draftToSpec(draft: SpecDraft): WallSpec {
+  return {
+    width: draft.wallWidth,
+    height: draft.wallHeight,
+    brick: WAALFORMAAT,
+    joint: JOINT,
+    opening:
+      draft.openingKind === 'none'
+        ? null
+        : {
+            x: draft.opening.x,
+            width: draft.opening.width,
+            sill_height: draft.openingKind === 'door' ? 0 : draft.opening.sill,
+            height: draft.opening.height,
+          },
+  };
+}
+
+function describeError(err: PlanError): string {
+  switch (err.kind) {
+    case 'InvalidDimension':
+      return `${err.field} must be a positive number`;
+    case 'WallSmallerThanBrick':
+      return 'the wall must fit at least one brick';
+    case 'OpeningOutOfBounds':
+      return 'the opening extends outside the wall';
+    case 'UnsupportedPlacement':
+      return `planner invariant broken: placement ${err.placement_id} is unsupported`;
+    case 'MalformedSpec':
+      return `malformed spec: ${err.message}`;
+  }
+}
+
 export default function App() {
+  const [draft, setDraft] = useState<SpecDraft>({
+    wallWidth: 3000,
+    wallHeight: 2400,
+    openingKind: 'window',
+    opening: { x: 1000, width: 800, sill: 600, height: 600 },
+  });
   const [stepIndex, setStepIndexState] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<Speed>(4);
@@ -32,6 +66,11 @@ export default function App() {
     setStepIndexState(i);
   };
 
+  // Every edit re-plans synchronously through the WASM boundary; at
+  // <10ms for walls far larger than the slider ranges allow, there is
+  // nothing to debounce.
+  const spec = useMemo(() => draftToSpec(draft), [draft]);
+  const result = useMemo(() => planWall(spec), [spec]);
   const plan = result.ok ?? null;
   const totalSteps = plan?.steps.length ?? 0;
 
@@ -54,40 +93,55 @@ export default function App() {
     if (stepIndex >= totalSteps) setPlaying(false);
   }, [stepIndex, totalSteps]);
 
-  if (!plan) {
-    return <p>Planning failed: {JSON.stringify(result.err)}</p>;
-  }
+  // Editing the spec keeps the playback position, clamped to the new plan.
+  useEffect(() => {
+    if (stepIndexRef.current > totalSteps) setStepIndex(totalSteps);
+  }, [totalSteps]);
 
   const togglePlay = () => {
     if (!playing && stepIndex >= totalSteps) setStepIndex(0); // replay from the start
     setPlaying(!playing);
   };
 
-  const { stats } = plan;
   return (
     <main>
       <header className="masthead">
         <h1>BrickPlan</h1>
         <p>a wall spec becomes a plan becomes a wall</p>
       </header>
-      <WallCanvas plan={plan} placedCount={Math.floor(stepIndex / 2)} />
-      <PlaybackBar
-        stepIndex={stepIndex}
-        totalSteps={totalSteps}
-        playing={playing}
-        speed={speed}
-        onTogglePlay={togglePlay}
-        onScrub={(i) => {
-          setPlaying(false);
-          setStepIndex(i);
-        }}
-        onSpeedChange={setSpeed}
-      />
-      <p className="stats-line">
-        {plan.spec.width} × {plan.spec.height} mm · {stats.courses} courses ·{' '}
-        {plan.placements.length} bricks ({stats.full_bricks} full, {stats.half_bricks} half,{' '}
-        {stats.cut_bricks} cut) · {plan.steps.length} steps
-      </p>
+      <div className="layout">
+        <div className="stage">
+          {plan ? (
+            <>
+              <WallCanvas plan={plan} placedCount={Math.floor(stepIndex / 2)} />
+              <PlaybackBar
+                stepIndex={stepIndex}
+                totalSteps={totalSteps}
+                playing={playing}
+                speed={speed}
+                onTogglePlay={togglePlay}
+                onScrub={(i) => {
+                  setPlaying(false);
+                  setStepIndex(i);
+                }}
+                onSpeedChange={setSpeed}
+              />
+              <p className="stats-line">
+                {plan.spec.width} × {plan.spec.height} mm · {plan.stats.courses} courses ·{' '}
+                {plan.placements.length} bricks ({plan.stats.full_bricks} full,{' '}
+                {plan.stats.half_bricks} half, {plan.stats.cut_bricks} cut) · {plan.steps.length}{' '}
+                steps
+              </p>
+            </>
+          ) : (
+            <div className="plan-error" role="alert">
+              <p>No plan: {describeError(result.err!)}.</p>
+              <p>Adjust the spec — the planner rejects anything it cannot build.</p>
+            </div>
+          )}
+        </div>
+        <SpecControls draft={draft} onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))} />
+      </div>
     </main>
   );
 }
