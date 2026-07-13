@@ -1,7 +1,7 @@
 # BrickPlan
 
-Define a small building — four walls on a rectangular footprint, with a
-door or window in the front. A Rust planner — compiled to WebAssembly,
+Define a small building — four walls on a rectangular footprint, with
+doors and windows on any wall. A Rust planner — compiled to WebAssembly,
 running in your browser — turns it into a brick-by-brick placement plan
 as plain JSON. A React simulator builds the plan in 3D, one step at a time.
 
@@ -15,7 +15,7 @@ opening, no physics — but the architecture is the real thing in miniature.
 ## Architecture
 
 ```
-  WallSpec (footprint, height, brick, joint, optional opening)
+  WallSpec (footprint, height, brick, joint, openings)
       |
       v
   planner/ ................. Rust crate, pure functions
@@ -70,9 +70,9 @@ A real masonry planner would treat each of these differently:
 
 - **One bond pattern.** Stretcher bond only. Flemish, English, or header
   bonds would turn the per-course layout into a strategy the spec selects.
-- **One opening, front wall only.** And it must stay clear of the corner
-  returns; the planner rejects anything else. Openings per wall would be
-  a spec change, not an engine change.
+- **Openings avoid corners.** Any number of doors and windows on any
+  wall, but never inside a corner return, and never overlapping on the
+  same wall — the planner rejects both rather than improvising.
 - **Naive lintels.** The course above an opening spans it uninterrupted,
   and the support check knowingly accepts bricks resting on that gap. A
   real wall gets a lintel element with its own placement and lead time.
@@ -125,7 +125,6 @@ is fully static — any static host works.
 
 ## Future work
 
-- Openings on any wall, and more than one per wall.
 - Alternative bond patterns as planner strategies.
 - Robot-flavored constraints: reachability windows, cure-time-aware
   sequencing, replanning after a failed placement.

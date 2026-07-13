@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { WebGPURenderer } from 'three/webgpu';
 
 import { brickLength } from '../geometry';
-import type { Plan, Placement, WallSpec } from '../types';
+import type { Opening, Plan, Placement, WallSpec } from '../types';
 
 // Materials cannot read CSS variables, so the palette is mirrored here.
 const COLORS = {
@@ -24,15 +24,30 @@ const MM = 0.001;
 
 interface WallSceneProps {
   plan: Plan;
-  /** How many bricks are on the walls at the current playback position. */
-  placedCount: number;
+  /** Playback position; a pick and a place both count as one step. */
+  stepIndex: number;
 }
 
-export default function WallScene({ plan, placedCount }: WallSceneProps) {
-  const { spec } = plan;
+export default function WallScene({ plan, stepIndex }: WallSceneProps) {
+  const { spec, stats } = plan;
+  const placedCount = Math.floor(stepIndex / 2);
   const maxDim = Math.max(spec.width, spec.length, spec.height) * MM;
   return (
     <div className="scene-holder">
+      <div className="legend">
+        <p className="legend-title">
+          {spec.width} × {spec.length} × {spec.height} mm
+        </p>
+        <p>
+          {stats.courses} courses · {plan.placements.length} bricks
+        </p>
+        <p>
+          {stats.full_bricks} full · {stats.half_bricks} half · {stats.cut_bricks} cut
+        </p>
+        <p>
+          step {stepIndex} / {plan.steps.length} · {placedCount} placed
+        </p>
+      </div>
       {/* WebGPU when the browser has it, WebGL otherwise (the renderer
           falls back by itself). frameloop="demand" renders only when the
           camera moves or the plan/playback changes — idle cost is zero. */}
@@ -90,7 +105,7 @@ function Controls({ targetY }: { targetY: number }) {
 }
 
 /// Where the build is heading: a wireframe of the target envelope, and
-/// the opening marked in the front wall before any brick reaches it.
+/// every opening marked in its wall before any brick reaches it.
 function Ghost({ spec }: { spec: WallSpec }) {
   const envelope = useMemo(
     () =>
@@ -99,44 +114,48 @@ function Ghost({ spec }: { spec: WallSpec }) {
       ),
     [spec.width, spec.height, spec.length],
   );
-  const opening = useMemo(
-    () =>
-      spec.opening
-        ? new THREE.EdgesGeometry(
-            new THREE.BoxGeometry(
-              spec.opening.width * MM,
-              spec.opening.height * MM,
-              spec.brick.width * MM,
-            ),
-          )
-        : null,
-    [spec.opening, spec.brick.width],
-  );
-  const op = spec.opening;
   return (
     <group>
       <lineSegments geometry={envelope} position={[0, (spec.height * MM) / 2, 0]}>
         <lineBasicMaterial color={COLORS.ink} transparent opacity={0.3} />
       </lineSegments>
-      {op && opening && (
-        <group
-          position={[
-            (op.x + op.width / 2) * MM - (spec.width * MM) / 2,
-            (op.sill_height + op.height / 2) * MM,
-            (spec.brick.width * MM) / 2 - (spec.length * MM) / 2,
-          ]}
-        >
-          <lineSegments geometry={opening}>
-            <lineBasicMaterial color={COLORS.wine} transparent opacity={0.55} />
-          </lineSegments>
-          <mesh>
-            <boxGeometry
-              args={[op.width * MM, op.height * MM, (spec.brick.width * MM) * 0.98]}
-            />
-            <meshBasicMaterial color={COLORS.wine} transparent opacity={0.07} depthWrite={false} />
-          </mesh>
-        </group>
-      )}
+      {spec.openings.map((op, i) => (
+        <OpeningGhost key={i} spec={spec} opening={op} />
+      ))}
+    </group>
+  );
+}
+
+function OpeningGhost({ spec, opening: op }: { spec: WallSpec; opening: Opening }) {
+  const alongX = op.wall === 'South' || op.wall === 'North';
+  const t = spec.brick.width * MM;
+  // Opening slab dimensions in scene space: along the wall, up, through it.
+  const sizeX = (alongX ? op.width : spec.brick.width) * MM;
+  const sizeZ = (alongX ? spec.brick.width : op.width) * MM;
+  const sizeY = op.height * MM;
+  const geometry = useMemo(
+    () => new THREE.EdgesGeometry(new THREE.BoxGeometry(sizeX, sizeY, sizeZ)),
+    [sizeX, sizeY, sizeZ],
+  );
+  const centerAlong = (op.x + op.width / 2) * MM;
+  const position: [number, number, number] = [
+    alongX
+      ? centerAlong - (spec.width * MM) / 2
+      : (op.wall === 'West' ? t / 2 : spec.width * MM - t / 2) - (spec.width * MM) / 2,
+    (op.sill_height + op.height / 2) * MM,
+    alongX
+      ? (op.wall === 'South' ? t / 2 : spec.length * MM - t / 2) - (spec.length * MM) / 2
+      : centerAlong - (spec.length * MM) / 2,
+  ];
+  return (
+    <group position={position}>
+      <lineSegments geometry={geometry}>
+        <lineBasicMaterial color={COLORS.wine} transparent opacity={0.55} />
+      </lineSegments>
+      <mesh>
+        <boxGeometry args={[sizeX * 0.999, sizeY * 0.999, sizeZ * 0.999]} />
+        <meshBasicMaterial color={COLORS.wine} transparent opacity={0.07} depthWrite={false} />
+      </mesh>
     </group>
   );
 }
@@ -148,7 +167,7 @@ function baseColor(p: Placement): string {
 /// All bricks live in one InstancedMesh: matrices are written once per
 /// plan, and playback only moves the instance count — so scrubbing a
 /// multi-thousand-step plan costs nothing.
-function Bricks({ plan, placedCount }: WallSceneProps) {
+function Bricks({ plan, placedCount }: { plan: Plan; placedCount: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const invalidate = useThree((state) => state.invalidate);
   const { spec } = plan;

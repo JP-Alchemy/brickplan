@@ -5,7 +5,7 @@ mod sequence;
 mod snapshot;
 mod validation;
 
-use crate::spec::{BrickDims, Opening, WallSpec};
+use crate::spec::{BrickDims, Opening, WallSide, WallSpec};
 
 pub const EPS: f64 = 1e-6;
 
@@ -17,17 +17,22 @@ pub fn room(width: f64, length: f64, height: f64) -> WallSpec {
         height,
         brick: BrickDims::default(),
         joint: 10.0,
-        opening: None,
+        openings: vec![],
     }
 }
 
-pub fn with_opening(mut spec: WallSpec, opening: Opening) -> WallSpec {
-    spec.opening = Some(opening);
+pub fn with_openings(mut spec: WallSpec, openings: Vec<Opening>) -> WallSpec {
+    spec.openings = openings;
     spec
 }
 
-pub fn door(x: f64, width: f64, height: f64) -> Opening {
+pub fn with_opening(spec: WallSpec, opening: Opening) -> WallSpec {
+    with_openings(spec, vec![opening])
+}
+
+pub fn door(wall: WallSide, x: f64, width: f64, height: f64) -> Opening {
     Opening {
+        wall,
         x,
         width,
         sill_height: 0.0,
@@ -35,8 +40,9 @@ pub fn door(x: f64, width: f64, height: f64) -> Opening {
     }
 }
 
-pub fn window(x: f64, width: f64, sill_height: f64, height: f64) -> Opening {
+pub fn window(wall: WallSide, x: f64, width: f64, sill_height: f64, height: f64) -> Opening {
     Opening {
+        wall,
         x,
         width,
         sill_height,

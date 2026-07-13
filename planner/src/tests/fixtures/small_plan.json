@@ -15,28 +15,6 @@
       "course": 0,
       "id": 1,
       "kind": {
-        "type": "Full"
-      },
-      "wall": "North",
-      "x": 0.0,
-      "y": 460.0,
-      "z": 0.0
-    },
-    {
-      "course": 0,
-      "id": 2,
-      "kind": {
-        "type": "Full"
-      },
-      "wall": "North",
-      "x": 220.0,
-      "y": 460.0,
-      "z": 0.0
-    },
-    {
-      "course": 0,
-      "id": 3,
-      "kind": {
         "length": 200.0,
         "type": "Cut"
       },
@@ -47,18 +25,7 @@
     },
     {
       "course": 0,
-      "id": 4,
-      "kind": {
-        "type": "Full"
-      },
-      "wall": "North",
-      "x": 440.0,
-      "y": 460.0,
-      "z": 0.0
-    },
-    {
-      "course": 0,
-      "id": 5,
+      "id": 2,
       "kind": {
         "length": 40.0,
         "type": "Cut"
@@ -66,6 +33,39 @@
       "wall": "South",
       "x": 660.0,
       "y": 0.0,
+      "z": 0.0
+    },
+    {
+      "course": 0,
+      "id": 3,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "North",
+      "x": 0.0,
+      "y": 460.0,
+      "z": 0.0
+    },
+    {
+      "course": 0,
+      "id": 4,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "North",
+      "x": 220.0,
+      "y": 460.0,
+      "z": 0.0
+    },
+    {
+      "course": 0,
+      "id": 5,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "North",
+      "x": 440.0,
+      "y": 460.0,
       "z": 0.0
     },
     {
@@ -95,23 +95,23 @@
       "course": 0,
       "id": 8,
       "kind": {
-        "type": "Full"
-      },
-      "wall": "West",
-      "x": 0.0,
-      "y": 110.0,
-      "z": 0.0
-    },
-    {
-      "course": 0,
-      "id": 9,
-      "kind": {
         "length": 120.0,
         "type": "Cut"
       },
       "wall": "East",
       "x": 600.0,
       "y": 330.0,
+      "z": 0.0
+    },
+    {
+      "course": 0,
+      "id": 9,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "West",
+      "x": 0.0,
+      "y": 110.0,
       "z": 0.0
     },
     {
@@ -142,17 +142,6 @@
       "course": 1,
       "id": 12,
       "kind": {
-        "type": "Full"
-      },
-      "wall": "North",
-      "x": 110.0,
-      "y": 460.0,
-      "z": 60.0
-    },
-    {
-      "course": 1,
-      "id": 13,
-      "kind": {
         "length": 90.0,
         "type": "Cut"
       },
@@ -163,18 +152,7 @@
     },
     {
       "course": 1,
-      "id": 14,
-      "kind": {
-        "type": "Full"
-      },
-      "wall": "North",
-      "x": 330.0,
-      "y": 460.0,
-      "z": 60.0
-    },
-    {
-      "course": 1,
-      "id": 15,
+      "id": 13,
       "kind": {
         "length": 40.0,
         "type": "Cut"
@@ -182,6 +160,28 @@
       "wall": "South",
       "x": 550.0,
       "y": 0.0,
+      "z": 60.0
+    },
+    {
+      "course": 1,
+      "id": 14,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "North",
+      "x": 110.0,
+      "y": 460.0,
+      "z": 60.0
+    },
+    {
+      "course": 1,
+      "id": 15,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "North",
+      "x": 330.0,
+      "y": 460.0,
       "z": 60.0
     },
     {
@@ -200,7 +200,8 @@
       "course": 1,
       "id": 17,
       "kind": {
-        "type": "Full"
+        "length": 170.0,
+        "type": "Cut"
       },
       "wall": "East",
       "x": 600.0,
@@ -211,22 +212,24 @@
       "course": 1,
       "id": 18,
       "kind": {
-        "type": "Full"
+        "length": 40.0,
+        "type": "Cut"
       },
-      "wall": "West",
-      "x": 0.0,
-      "y": 0.0,
+      "wall": "East",
+      "x": 600.0,
+      "y": 390.0,
       "z": 60.0
     },
     {
       "course": 1,
       "id": 19,
       "kind": {
-        "type": "Full"
+        "length": 120.0,
+        "type": "Cut"
       },
       "wall": "East",
       "x": 600.0,
-      "y": 220.0,
+      "y": 440.0,
       "z": 60.0
     },
     {
@@ -237,19 +240,18 @@
       },
       "wall": "West",
       "x": 0.0,
-      "y": 220.0,
+      "y": 0.0,
       "z": 60.0
     },
     {
       "course": 1,
       "id": 21,
       "kind": {
-        "length": 120.0,
-        "type": "Cut"
+        "type": "Full"
       },
-      "wall": "East",
-      "x": 600.0,
-      "y": 440.0,
+      "wall": "West",
+      "x": 0.0,
+      "y": 220.0,
       "z": 60.0
     },
     {
@@ -279,28 +281,6 @@
       "course": 2,
       "id": 24,
       "kind": {
-        "type": "Full"
-      },
-      "wall": "North",
-      "x": 0.0,
-      "y": 460.0,
-      "z": 120.0
-    },
-    {
-      "course": 2,
-      "id": 25,
-      "kind": {
-        "type": "Full"
-      },
-      "wall": "North",
-      "x": 220.0,
-      "y": 460.0,
-      "z": 120.0
-    },
-    {
-      "course": 2,
-      "id": 26,
-      "kind": {
         "length": 200.0,
         "type": "Cut"
       },
@@ -311,18 +291,7 @@
     },
     {
       "course": 2,
-      "id": 27,
-      "kind": {
-        "type": "Full"
-      },
-      "wall": "North",
-      "x": 440.0,
-      "y": 460.0,
-      "z": 120.0
-    },
-    {
-      "course": 2,
-      "id": 28,
+      "id": 25,
       "kind": {
         "length": 40.0,
         "type": "Cut"
@@ -330,6 +299,39 @@
       "wall": "South",
       "x": 660.0,
       "y": 0.0,
+      "z": 120.0
+    },
+    {
+      "course": 2,
+      "id": 26,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "North",
+      "x": 0.0,
+      "y": 460.0,
+      "z": 120.0
+    },
+    {
+      "course": 2,
+      "id": 27,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "North",
+      "x": 220.0,
+      "y": 460.0,
+      "z": 120.0
+    },
+    {
+      "course": 2,
+      "id": 28,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "North",
+      "x": 440.0,
+      "y": 460.0,
       "z": 120.0
     },
     {
@@ -359,23 +361,23 @@
       "course": 2,
       "id": 31,
       "kind": {
-        "type": "Full"
-      },
-      "wall": "West",
-      "x": 0.0,
-      "y": 110.0,
-      "z": 120.0
-    },
-    {
-      "course": 2,
-      "id": 32,
-      "kind": {
         "length": 120.0,
         "type": "Cut"
       },
       "wall": "East",
       "x": 600.0,
       "y": 330.0,
+      "z": 120.0
+    },
+    {
+      "course": 2,
+      "id": 32,
+      "kind": {
+        "type": "Full"
+      },
+      "wall": "West",
+      "x": 0.0,
+      "y": 110.0,
       "z": 120.0
     },
     {
@@ -400,18 +402,28 @@
     "height": 170.0,
     "joint": 10.0,
     "length": 560.0,
-    "opening": {
-      "height": 170.0,
-      "sill_height": 0.0,
-      "width": 220.0,
-      "x": 230.0
-    },
+    "openings": [
+      {
+        "height": 170.0,
+        "sill_height": 0.0,
+        "wall": "South",
+        "width": 220.0,
+        "x": 230.0
+      },
+      {
+        "height": 50.0,
+        "sill_height": 60.0,
+        "wall": "East",
+        "width": 220.0,
+        "x": 170.0
+      }
+    ],
     "width": 700.0
   },
   "stats": {
     "courses": 3,
-    "cut_bricks": 16,
-    "full_bricks": 18,
+    "cut_bricks": 18,
+    "full_bricks": 16,
     "half_bricks": 0
   },
   "steps": [
@@ -443,7 +455,7 @@
     },
     {
       "action": {
-        "placement_id": 3,
+        "placement_id": 1,
         "type": "PlaceBrick"
       },
       "seq": 3
@@ -460,7 +472,7 @@
     },
     {
       "action": {
-        "placement_id": 5,
+        "placement_id": 2,
         "type": "PlaceBrick"
       },
       "seq": 5
@@ -493,7 +505,7 @@
     },
     {
       "action": {
-        "placement_id": 9,
+        "placement_id": 8,
         "type": "PlaceBrick"
       },
       "seq": 9
@@ -509,7 +521,7 @@
     },
     {
       "action": {
-        "placement_id": 1,
+        "placement_id": 3,
         "type": "PlaceBrick"
       },
       "seq": 11
@@ -525,7 +537,7 @@
     },
     {
       "action": {
-        "placement_id": 2,
+        "placement_id": 4,
         "type": "PlaceBrick"
       },
       "seq": 13
@@ -541,7 +553,7 @@
     },
     {
       "action": {
-        "placement_id": 4,
+        "placement_id": 5,
         "type": "PlaceBrick"
       },
       "seq": 15
@@ -574,7 +586,7 @@
     },
     {
       "action": {
-        "placement_id": 8,
+        "placement_id": 9,
         "type": "PlaceBrick"
       },
       "seq": 19
@@ -625,7 +637,7 @@
     },
     {
       "action": {
-        "placement_id": 13,
+        "placement_id": 12,
         "type": "PlaceBrick"
       },
       "seq": 25
@@ -642,7 +654,7 @@
     },
     {
       "action": {
-        "placement_id": 15,
+        "placement_id": 13,
         "type": "PlaceBrick"
       },
       "seq": 27
@@ -650,7 +662,8 @@
     {
       "action": {
         "kind": {
-          "type": "Full"
+          "length": 170.0,
+          "type": "Cut"
         },
         "type": "PickBrick"
       },
@@ -666,7 +679,8 @@
     {
       "action": {
         "kind": {
-          "type": "Full"
+          "length": 40.0,
+          "type": "Cut"
         },
         "type": "PickBrick"
       },
@@ -674,7 +688,7 @@
     },
     {
       "action": {
-        "placement_id": 19,
+        "placement_id": 18,
         "type": "PlaceBrick"
       },
       "seq": 31
@@ -691,7 +705,7 @@
     },
     {
       "action": {
-        "placement_id": 21,
+        "placement_id": 19,
         "type": "PlaceBrick"
       },
       "seq": 33
@@ -707,7 +721,7 @@
     },
     {
       "action": {
-        "placement_id": 12,
+        "placement_id": 14,
         "type": "PlaceBrick"
       },
       "seq": 35
@@ -723,7 +737,7 @@
     },
     {
       "action": {
-        "placement_id": 14,
+        "placement_id": 15,
         "type": "PlaceBrick"
       },
       "seq": 37
@@ -756,7 +770,7 @@
     },
     {
       "action": {
-        "placement_id": 18,
+        "placement_id": 20,
         "type": "PlaceBrick"
       },
       "seq": 41
@@ -772,7 +786,7 @@
     },
     {
       "action": {
-        "placement_id": 20,
+        "placement_id": 21,
         "type": "PlaceBrick"
       },
       "seq": 43
@@ -822,7 +836,7 @@
     },
     {
       "action": {
-        "placement_id": 26,
+        "placement_id": 24,
         "type": "PlaceBrick"
       },
       "seq": 49
@@ -839,7 +853,7 @@
     },
     {
       "action": {
-        "placement_id": 28,
+        "placement_id": 25,
         "type": "PlaceBrick"
       },
       "seq": 51
@@ -872,7 +886,7 @@
     },
     {
       "action": {
-        "placement_id": 32,
+        "placement_id": 31,
         "type": "PlaceBrick"
       },
       "seq": 55
@@ -888,7 +902,7 @@
     },
     {
       "action": {
-        "placement_id": 24,
+        "placement_id": 26,
         "type": "PlaceBrick"
       },
       "seq": 57
@@ -904,7 +918,7 @@
     },
     {
       "action": {
-        "placement_id": 25,
+        "placement_id": 27,
         "type": "PlaceBrick"
       },
       "seq": 59
@@ -920,7 +934,7 @@
     },
     {
       "action": {
-        "placement_id": 27,
+        "placement_id": 28,
         "type": "PlaceBrick"
       },
       "seq": 61
@@ -953,7 +967,7 @@
     },
     {
       "action": {
-        "placement_id": 31,
+        "placement_id": 32,
         "type": "PlaceBrick"
       },
       "seq": 65

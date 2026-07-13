@@ -12,8 +12,8 @@
 
 use serde::{Deserialize, Serialize};
 
-pub use crate::spec::MIN_CUT_LENGTH;
 use crate::spec::WallSpec;
+pub use crate::spec::{MIN_CUT_LENGTH, WallSide};
 
 const EPS: f64 = 1e-6;
 
@@ -39,33 +39,6 @@ impl BrickKind {
 /// A half brick plus half a joint equals half the bond module.
 pub fn half_brick_length(spec: &WallSpec) -> f64 {
     (spec.brick.length - spec.joint) / 2.0
-}
-
-/// Which wall of the footprint a brick belongs to. South is the front
-/// wall (y = 0), and the only wall that can carry an opening.
-#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
-pub enum WallSide {
-    South,
-    East,
-    North,
-    West,
-}
-
-impl WallSide {
-    /// Build order within a course: front, right, back, left.
-    pub fn order(&self) -> u32 {
-        match self {
-            WallSide::South => 0,
-            WallSide::East => 1,
-            WallSide::North => 2,
-            WallSide::West => 3,
-        }
-    }
-
-    /// Front and back walls lay bricks along x; side walls along y.
-    pub fn along_x(&self) -> bool {
-        matches!(self, WallSide::South | WallSide::North)
-    }
 }
 
 /// One brick, placed. `x`/`y` is the plan-view minimum corner of the
@@ -116,7 +89,7 @@ pub fn course_count(spec: &WallSpec) -> u32 {
 }
 
 /// Lay out all four walls in stretcher bond with alternating corner
-/// returns, cutting the front wall around the opening.
+/// returns, cutting each wall around its openings.
 pub fn layout_walls(spec: &WallSpec) -> Vec<Placement> {
     let t = spec.brick.width;
     let m = spec.corner_return();
@@ -146,30 +119,29 @@ pub fn layout_walls(spec: &WallSpec) -> Vec<Placement> {
         } else {
             ((m, spec.width - m), (0.0, spec.length))
         };
-        for (x, len) in run_segments(spec, x_span.0, x_span.1) {
-            // Only the front wall carries the opening.
-            for (px, plen) in cut_around_opening(spec, x, len, z) {
-                push(WallSide::South, classify(spec, plen), px, 0.0, z, course);
+        for wall in [WallSide::South, WallSide::North] {
+            let y = if wall == WallSide::South {
+                0.0
+            } else {
+                spec.length - t
+            };
+            for (x, len) in run_segments(spec, x_span.0, x_span.1) {
+                for (px, plen) in cut_around_openings(spec, wall, x, len, z) {
+                    push(wall, classify(spec, plen), px, y, z, course);
+                }
             }
-            push(
-                WallSide::North,
-                classify(spec, len),
-                x,
-                spec.length - t,
-                z,
-                course,
-            );
         }
-        for (y, len) in run_segments(spec, y_span.0, y_span.1) {
-            push(
-                WallSide::East,
-                classify(spec, len),
-                spec.width - t,
-                y,
-                z,
-                course,
-            );
-            push(WallSide::West, classify(spec, len), 0.0, y, z, course);
+        for wall in [WallSide::East, WallSide::West] {
+            let x = if wall == WallSide::West {
+                0.0
+            } else {
+                spec.width - t
+            };
+            for (sy, len) in run_segments(spec, y_span.0, y_span.1) {
+                for (py, plen) in cut_around_openings(spec, wall, sy, len, z) {
+                    push(wall, classify(spec, plen), x, py, z, course);
+                }
+            }
         }
     }
     placements
@@ -197,27 +169,39 @@ fn run_segments(spec: &WallSpec, start: f64, end: f64) -> Vec<(f64, f64)> {
     segments
 }
 
-/// Cut one front-wall segment around the opening. Returns the pieces to
-/// keep: the whole segment if it misses the opening, otherwise the parts
-/// left and right of it (cut flush against the opening edges), dropping
-/// any piece below MIN_CUT_LENGTH.
-fn cut_around_opening(spec: &WallSpec, x: f64, length: f64, z: f64) -> Vec<(f64, f64)> {
-    let Some(op) = &spec.opening else {
-        return vec![(x, length)];
-    };
-    let intersects_vertically = z < op.top() - EPS && z + spec.brick.height > op.sill_height + EPS;
-    let intersects_horizontally = x < op.right() - EPS && x + length > op.x + EPS;
-    if !intersects_vertically || !intersects_horizontally {
-        return vec![(x, length)];
-    }
-    let mut pieces = Vec::new();
-    let left = op.x - x;
-    if left + EPS >= MIN_CUT_LENGTH {
-        pieces.push((x, left));
-    }
-    let right = (x + length) - op.right();
-    if right + EPS >= MIN_CUT_LENGTH {
-        pieces.push((op.right(), right));
+/// Cut one bond segment around every opening in its wall. Returns the
+/// pieces to keep: parts left and right of each opening it crosses (cut
+/// flush against the opening edges), dropping pieces below MIN_CUT_LENGTH.
+fn cut_around_openings(
+    spec: &WallSpec,
+    wall: WallSide,
+    along: f64,
+    length: f64,
+    z: f64,
+) -> Vec<(f64, f64)> {
+    let mut pieces = vec![(along, length)];
+    for op in spec.openings.iter().filter(|op| op.wall == wall) {
+        let intersects_vertically =
+            z < op.top() - EPS && z + spec.brick.height > op.sill_height + EPS;
+        if !intersects_vertically {
+            continue;
+        }
+        let mut next = Vec::with_capacity(pieces.len() + 1);
+        for (x, len) in pieces {
+            if x >= op.right() - EPS || x + len <= op.x + EPS {
+                next.push((x, len));
+                continue;
+            }
+            let left = op.x - x;
+            if left + EPS >= MIN_CUT_LENGTH {
+                next.push((x, left));
+            }
+            let right = (x + len) - op.right();
+            if right + EPS >= MIN_CUT_LENGTH {
+                next.push((op.right(), right));
+            }
+        }
+        pieces = next;
     }
     pieces
 }

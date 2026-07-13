@@ -196,18 +196,106 @@ header.masthead > p {
 
 /* The 3D viewport fills the content cell. */
 .scene-holder {
+  position: relative;
   width: 100%;
   height: 100%;
   border: 1px solid var(--line);
 }
 
-.stats-line {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--hairline);
-  color: var(--ink-soft);
+/* Build legend, drawn over the viewport's top-left corner. */
+.legend {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1;
+  pointer-events: none;
   font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
+}
+
+.legend-title {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.opening-list {
+  list-style: none;
+  padding: 0;
+}
+
+.opening {
+  border: 1px solid var(--hairline);
+}
+
+.opening + .opening {
+  margin-top: 0.5rem;
+}
+
+.opening.selected {
+  border-color: var(--line);
+}
+
+.opening-row {
+  display: flex;
+  align-items: stretch;
+}
+
+.opening-title {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: none;
+  border: none;
+  padding: 0.4rem 0.6rem;
+  flex: 1;
+  text-align: left;
+  cursor: pointer;
+}
+
+.opening-remove {
+  font: inherit;
+  color: var(--ink-soft);
+  background: none;
+  border: none;
+  border-left: 1px solid var(--hairline);
+  padding: 0 0.6rem;
+  cursor: pointer;
+}
+
+.opening-remove:hover {
+  color: var(--accent);
+}
+
+.opening-editor {
+  padding: 0.6rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.opening-editor .kind-toggle + .kind-toggle {
+  margin-top: 0.5rem;
+}
+
+.opening-editor .kind-toggle + .field {
+  margin-top: 0.9rem;
+}
+
+.opening-add {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--line);
+  padding: 0.3rem 0.75rem;
+  margin-top: 0.75rem;
+  width: 100%;
+  cursor: pointer;
+}
+
+.opening-add:hover {
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .playback-bar {

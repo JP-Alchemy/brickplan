@@ -64,15 +64,20 @@ pub fn validate_support(spec: &WallSpec, placements: &[Placement]) -> Result<(),
             .iter()
             .filter(|b| b.course == p.course - 1)
             .any(|b| crate::layout::plan_rects_overlap(rect, b.plan_rect(spec)));
-        // The lintel simplification: the front-wall course directly above
-        // the opening spans it, so a brick over the opening counts as
-        // supported. A real planner would require an actual lintel element.
-        let on_opening = p.wall == crate::layout::WallSide::South
-            && spec.opening.as_ref().is_some_and(|op| {
-                let below_z = f64::from(p.course - 1) * crate::layout::course_height(spec);
+        // The lintel simplification: the course directly above an opening
+        // spans it, so a brick over the opening counts as supported. A
+        // real planner would require an actual lintel element.
+        let below_z = f64::from(p.course - 1) * crate::layout::course_height(spec);
+        let on_opening = spec
+            .openings
+            .iter()
+            .filter(|op| op.wall == p.wall)
+            .any(|op| {
                 let below_in_opening =
                     below_z < op.top() - EPS && below_z + spec.brick.height > op.sill_height + EPS;
-                below_in_opening && p.x < op.right() - EPS && p.x + p.kind.length(spec) > op.x + EPS
+                below_in_opening
+                    && p.along() < op.right() - EPS
+                    && p.along() + p.kind.length(spec) > op.x + EPS
             });
         if !on_brick && !on_opening {
             return Err(PlanError::UnsupportedPlacement { placement_id: p.id });

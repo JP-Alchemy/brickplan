@@ -1,6 +1,6 @@
 use super::*;
 use crate::plan::plan;
-use crate::spec::{BrickDims, PlanError};
+use crate::spec::{BrickDims, PlanError, WallSide};
 
 #[test]
 fn accepts_plain_room() {
@@ -101,19 +101,44 @@ fn rejects_wall_shorter_than_one_brick() {
 #[test]
 fn rejects_opening_past_the_corner_zone() {
     // Front wall is 2500 wide; the last 110mm belong to the corner return.
-    let spec = with_opening(room(2500.0, 2000.0, 2000.0), door(1700.0, 800.0, 1500.0));
+    let spec = with_opening(
+        room(2500.0, 2000.0, 2000.0),
+        door(WallSide::South, 1700.0, 800.0, 1500.0),
+    );
     assert_eq!(spec.validate(), Err(PlanError::OpeningOutOfBounds));
 }
 
 #[test]
 fn rejects_opening_in_the_left_corner_zone() {
-    let spec = with_opening(room(2500.0, 2000.0, 2000.0), door(50.0, 800.0, 1500.0));
+    let spec = with_opening(
+        room(2500.0, 2000.0, 2000.0),
+        door(WallSide::South, 50.0, 800.0, 1500.0),
+    );
     assert_eq!(spec.validate(), Err(PlanError::OpeningOutOfBounds));
 }
 
 #[test]
+fn side_wall_openings_use_that_walls_extent() {
+    // Length is 2000, so x = 1200, width 800 runs into the corner return
+    // on a side wall — but would be fine on the 2500-wide front wall.
+    let spec = with_opening(
+        room(2500.0, 2000.0, 2000.0),
+        door(WallSide::East, 1200.0, 800.0, 1500.0),
+    );
+    assert_eq!(spec.validate(), Err(PlanError::OpeningOutOfBounds));
+    let spec = with_opening(
+        room(2500.0, 2000.0, 2000.0),
+        door(WallSide::East, 1000.0, 800.0, 1500.0),
+    );
+    assert_eq!(spec.validate(), Ok(()));
+}
+
+#[test]
 fn accepts_opening_flush_with_the_corner_return() {
-    let spec = with_opening(room(2500.0, 2000.0, 2000.0), door(110.0, 800.0, 1500.0));
+    let spec = with_opening(
+        room(2500.0, 2000.0, 2000.0),
+        door(WallSide::South, 110.0, 800.0, 1500.0),
+    );
     assert_eq!(spec.validate(), Ok(()));
 }
 
@@ -121,20 +146,60 @@ fn accepts_opening_flush_with_the_corner_return() {
 fn rejects_opening_above_wall_top() {
     let spec = with_opening(
         room(2500.0, 2000.0, 2000.0),
-        window(500.0, 800.0, 1500.0, 600.0),
+        window(WallSide::South, 500.0, 800.0, 1500.0, 600.0),
     );
     assert_eq!(spec.validate(), Err(PlanError::OpeningOutOfBounds));
 }
 
 #[test]
 fn rejects_zero_width_opening() {
-    let spec = with_opening(room(2500.0, 2000.0, 2000.0), door(500.0, 0.0, 1500.0));
+    let spec = with_opening(
+        room(2500.0, 2000.0, 2000.0),
+        door(WallSide::South, 500.0, 0.0, 1500.0),
+    );
     assert_eq!(
         spec.validate(),
         Err(PlanError::InvalidDimension {
             field: "opening width".into()
         })
     );
+}
+
+#[test]
+fn rejects_overlapping_openings_on_the_same_wall() {
+    let spec = with_openings(
+        room(2500.0, 2000.0, 2000.0),
+        vec![
+            door(WallSide::South, 400.0, 800.0, 1500.0),
+            window(WallSide::South, 1000.0, 600.0, 900.0, 600.0),
+        ],
+    );
+    assert_eq!(spec.validate(), Err(PlanError::OpeningsOverlap));
+}
+
+#[test]
+fn accepts_stacked_openings_that_do_not_overlap() {
+    // Same x range, but the window sits fully above the door's top.
+    let spec = with_openings(
+        room(2500.0, 2000.0, 2000.0),
+        vec![
+            door(WallSide::South, 400.0, 800.0, 1200.0),
+            window(WallSide::South, 400.0, 800.0, 1300.0, 500.0),
+        ],
+    );
+    assert_eq!(spec.validate(), Ok(()));
+}
+
+#[test]
+fn accepts_identical_openings_on_different_walls() {
+    let spec = with_openings(
+        room(2500.0, 2000.0, 2000.0),
+        vec![
+            door(WallSide::South, 400.0, 800.0, 1500.0),
+            door(WallSide::North, 400.0, 800.0, 1500.0),
+        ],
+    );
+    assert_eq!(spec.validate(), Ok(()));
 }
 
 #[test]

@@ -46,7 +46,10 @@ export default function InfoDialog() {
           <h2>How to use</h2>
           <ul>
             <li>Shape the walls with the sliders — every change re-plans instantly.</li>
-            <li>Add a door or window to the front wall; bricks are cut to land flush against it.</li>
+            <li>
+              Add doors and windows to any wall, as many as fit; bricks are cut to land flush
+              against each one.
+            </li>
             <li>Drag to orbit, scroll to zoom — the corners are worth a close look.</li>
             <li>Press Play to watch the placement sequence, scrub freely, change speed.</li>
             <li>Open &ldquo;Plan JSON&rdquo; to inspect the raw plan, or download all of it.</li>

@@ -8,7 +8,10 @@ export interface BrickDims {
   width: number;
 }
 
+export type WallSide = 'South' | 'East' | 'North' | 'West';
+
 export interface Opening {
+  wall: WallSide;
   x: number;
   width: number;
   sill_height: number;
@@ -21,15 +24,13 @@ export interface WallSpec {
   height: number;
   brick: BrickDims;
   joint: number;
-  opening: Opening | null;
+  openings: Opening[];
 }
 
 export type BrickKind =
   | { type: 'Full' }
   | { type: 'Half' }
   | { type: 'Cut'; length: number };
-
-export type WallSide = 'South' | 'East' | 'North' | 'West';
 
 export interface Placement {
   id: number;
@@ -68,6 +69,7 @@ export type PlanError =
   | { kind: 'InvalidDimension'; field: string }
   | { kind: 'WallSmallerThanBrick' }
   | { kind: 'OpeningOutOfBounds' }
+  | { kind: 'OpeningsOverlap' }
   | { kind: 'UnsupportedPlacement'; placement_id: number }
   | { kind: 'MalformedSpec'; message: string };
 

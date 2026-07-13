@@ -23,15 +23,13 @@ function draftToSpec(draft: SpecDraft): WallSpec {
     height: draft.wallHeight,
     brick: WAALFORMAAT,
     joint: JOINT,
-    opening:
-      draft.openingKind === 'none'
-        ? null
-        : {
-            x: draft.opening.x,
-            width: draft.opening.width,
-            sill_height: draft.openingKind === 'door' ? 0 : draft.opening.sill,
-            height: draft.opening.height,
-          },
+    openings: draft.openings.map((op) => ({
+      wall: op.wall,
+      x: op.x,
+      width: op.width,
+      sill_height: op.kind === 'door' ? 0 : op.sill,
+      height: op.height,
+    })),
   };
 }
 
@@ -42,7 +40,9 @@ function describeError(err: PlanError): string {
     case 'WallSmallerThanBrick':
       return 'the wall must fit at least one brick';
     case 'OpeningOutOfBounds':
-      return 'the opening leaves the front wall or crosses a corner';
+      return 'an opening leaves its wall or crosses a corner';
+    case 'OpeningsOverlap':
+      return 'two openings on the same wall overlap';
     case 'UnsupportedPlacement':
       return `planner invariant broken: placement ${err.placement_id} is unsupported`;
     case 'MalformedSpec':
@@ -55,8 +55,11 @@ export default function App() {
     wallWidth: 3000,
     wallLength: 2200,
     wallHeight: 2400,
-    openingKind: 'window',
-    opening: { x: 1000, width: 800, sill: 600, height: 600 },
+    openings: [
+      { id: 1, wall: 'South', kind: 'door', x: 400, width: 900, sill: 0, height: 2000 },
+      { id: 2, wall: 'South', kind: 'window', x: 1700, width: 800, sill: 600, height: 600 },
+      { id: 3, wall: 'East', kind: 'window', x: 700, width: 800, sill: 600, height: 600 },
+    ],
   });
   const [stepIndex, setStepIndexState] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -118,7 +121,7 @@ export default function App() {
       <div className="app-body">
         <section className="content">
           {plan ? (
-            <WallScene plan={plan} placedCount={Math.floor(clampedStep / 2)} />
+            <WallScene plan={plan} stepIndex={clampedStep} />
           ) : (
             <div className="plan-error" role="alert">
               <p>No plan: {describeError(result.err!)}.</p>
@@ -131,16 +134,7 @@ export default function App() {
             draft={draft}
             onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))}
           />
-          {plan && (
-            <>
-              <p className="stats-line">
-                {plan.stats.courses} courses · {plan.placements.length} bricks (
-                {plan.stats.full_bricks} full, {plan.stats.half_bricks} half,{' '}
-                {plan.stats.cut_bricks} cut) · {plan.steps.length} steps
-              </p>
-              <PlanPanel plan={plan} />
-            </>
-          )}
+          {plan && <PlanPanel plan={plan} />}
         </aside>
       </div>
       {plan && (

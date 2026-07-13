@@ -33,7 +33,7 @@ fn steps_alternate_pick_and_place() {
 fn each_pick_matches_the_following_place() {
     let plan = plan(with_opening(
         room(3000.0, 2000.0, 1200.0),
-        door(900.0, 800.0, 1000.0),
+        door(WallSide::South, 900.0, 800.0, 1000.0),
     ))
     .unwrap();
     for pair in plan.steps.chunks(2) {
@@ -55,7 +55,7 @@ fn each_pick_matches_the_following_place() {
 fn placements_are_ordered_bottom_up_then_by_wall_then_along_it() {
     let plan = plan(with_opening(
         room(3000.0, 2400.0, 2400.0),
-        window(1000.0, 800.0, 600.0, 600.0),
+        window(WallSide::South, 1000.0, 800.0, 600.0, 600.0),
     ))
     .unwrap();
     let placed: Vec<&Placement> = plan
@@ -84,11 +84,14 @@ fn placements_are_ordered_bottom_up_then_by_wall_then_along_it() {
 fn support_check_accepts_generated_layouts() {
     let specs = [
         room(2500.0, 2000.0, 2000.0),
-        with_opening(room(3000.0, 2400.0, 2400.0), door(900.0, 800.0, 2000.0)),
+        with_opening(
+            room(3000.0, 2400.0, 2400.0),
+            door(WallSide::South, 900.0, 800.0, 2000.0),
+        ),
         // Opening wide enough that some lintel bricks sit entirely over it.
         with_opening(
             room(3000.0, 2400.0, 2400.0),
-            window(1000.0, 800.0, 600.0, 600.0),
+            window(WallSide::South, 1000.0, 800.0, 600.0, 600.0),
         ),
     ];
     for spec in &specs {
@@ -144,4 +147,16 @@ fn sequence_propagates_support_failures() {
         sequence(&spec, &floating),
         Err(PlanError::UnsupportedPlacement { placement_id: 7 })
     );
+}
+
+#[test]
+fn support_check_accepts_openings_on_side_walls() {
+    // A wide window on the east wall: some lintel bricks above it rest
+    // only on the opening span.
+    let spec = with_opening(
+        room(3000.0, 2400.0, 2400.0),
+        window(WallSide::East, 800.0, 800.0, 600.0, 600.0),
+    );
+    let placements = layout_walls(&spec);
+    assert_eq!(validate_support(&spec, &placements), Ok(()));
 }

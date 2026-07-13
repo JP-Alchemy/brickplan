@@ -31,10 +31,39 @@ impl Default for BrickDims {
     }
 }
 
-/// A rectangular opening in the front (south) wall. A door is an opening
-/// with `sill_height` 0; a window sits higher up.
+/// Which wall of the footprint something belongs to. South is the front
+/// wall (y = 0).
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum WallSide {
+    South,
+    East,
+    North,
+    West,
+}
+
+impl WallSide {
+    /// Build order within a course: front, right, back, left.
+    pub fn order(&self) -> u32 {
+        match self {
+            WallSide::South => 0,
+            WallSide::East => 1,
+            WallSide::North => 2,
+            WallSide::West => 3,
+        }
+    }
+
+    /// Front and back walls lay bricks along x; side walls along y.
+    pub fn along_x(&self) -> bool {
+        matches!(self, WallSide::South | WallSide::North)
+    }
+}
+
+/// A rectangular opening in one wall. `x` is measured along that wall's
+/// own axis from its low corner (west end for front/back walls, south
+/// end for side walls). A door is an opening with `sill_height` 0.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Opening {
+    pub wall: WallSide,
     pub x: f64,
     pub width: f64,
     pub sill_height: f64,
@@ -49,10 +78,19 @@ impl Opening {
     pub fn top(&self) -> f64 {
         self.sill_height + self.height
     }
+
+    /// Overlap in the wall's elevation plane; touching edges are allowed.
+    fn overlaps(&self, other: &Opening) -> bool {
+        self.wall == other.wall
+            && self.x < other.right() - EPS
+            && self.right() > other.x + EPS
+            && self.sill_height < other.top() - EPS
+            && self.top() > other.sill_height + EPS
+    }
 }
 
 /// The full building specification: four walls on a rectangular
-/// footprint, with an optional opening in the front wall.
+/// footprint, with any number of openings.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct WallSpec {
     /// Outer footprint extent along x (the front and back walls).
@@ -63,8 +101,7 @@ pub struct WallSpec {
     pub brick: BrickDims,
     /// Mortar joint thickness in mm.
     pub joint: f64,
-    /// Opening in the front wall, if any.
-    pub opening: Option<Opening>,
+    pub openings: Vec<Opening>,
 }
 
 /// Why a spec could not be turned into a plan. Serializable so the UI can
@@ -76,8 +113,10 @@ pub enum PlanError {
     InvalidDimension { field: String },
     #[error("the footprint must fit corner returns and at least one brick")]
     WallSmallerThanBrick,
-    #[error("opening extends outside the front wall or into a corner")]
+    #[error("an opening extends outside its wall or into a corner")]
     OpeningOutOfBounds,
+    #[error("two openings on the same wall overlap")]
+    OpeningsOverlap,
     #[error("placement {placement_id} has no support below it")]
     UnsupportedPlacement { placement_id: u32 },
     #[error("spec could not be parsed: {message}")]
@@ -91,6 +130,15 @@ impl WallSpec {
     /// a module.
     pub fn corner_return(&self) -> f64 {
         self.brick.width + self.joint
+    }
+
+    /// The outer extent of a given wall along its own axis.
+    pub fn wall_extent(&self, wall: WallSide) -> f64 {
+        if wall.along_x() {
+            self.width
+        } else {
+            self.length
+        }
     }
 
     /// Check the spec is geometrically meaningful before planning.
@@ -119,7 +167,7 @@ impl WallSpec {
         if self.width < min_extent || self.length < min_extent || self.height < self.brick.height {
             return Err(PlanError::WallSmallerThanBrick);
         }
-        if let Some(op) = &self.opening {
+        for op in &self.openings {
             check_positive("opening width", op.width)?;
             check_positive("opening height", op.height)?;
             for (field, value) in [("opening x", op.x), ("opening sill height", op.sill_height)] {
@@ -129,14 +177,19 @@ impl WallSpec {
                     });
                 }
             }
-            // The opening must stay clear of the corner returns, where the
-            // side walls' bricks turn into the front wall's bond.
+            // Openings must stay clear of the corner returns, where the
+            // perpendicular walls' bricks turn into this wall's bond.
             if op.x < self.corner_return() - EPS
                 || op.sill_height < 0.0
-                || op.right() > self.width - self.corner_return() + EPS
+                || op.right() > self.wall_extent(op.wall) - self.corner_return() + EPS
                 || op.top() > self.height
             {
                 return Err(PlanError::OpeningOutOfBounds);
+            }
+        }
+        for (i, a) in self.openings.iter().enumerate() {
+            if self.openings[i + 1..].iter().any(|b| a.overlaps(b)) {
+                return Err(PlanError::OpeningsOverlap);
             }
         }
         Ok(())

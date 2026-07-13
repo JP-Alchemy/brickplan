@@ -28,7 +28,13 @@ fn plan_result_envelope_serializes_as_ok_or_err() {
 /// and review the fixture diff before committing.
 #[test]
 fn small_plan_serializes_to_the_committed_fixture() {
-    let spec = with_opening(room(700.0, 560.0, 170.0), door(230.0, 220.0, 170.0));
+    let spec = with_openings(
+        room(700.0, 560.0, 170.0),
+        vec![
+            door(WallSide::South, 230.0, 220.0, 170.0),
+            window(WallSide::East, 170.0, 220.0, 60.0, 50.0),
+        ],
+    );
     let plan = plan(spec).unwrap();
     let actual = serde_json::to_value(&plan).unwrap();
     let path = concat!(

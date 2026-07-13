@@ -1,9 +1,10 @@
 use super::*;
 use crate::layout::{
-    BrickKind, MIN_CUT_LENGTH, WallSide, course_count, half_brick_length, layout_walls,
+    BrickKind, MIN_CUT_LENGTH, Placement, WallSide, course_count, half_brick_length, layout_walls,
     plan_rects_overlap,
 };
 use crate::plan::plan;
+use crate::spec::{Opening, WallSpec};
 
 const SIDES: [WallSide; 4] = [
     WallSide::South,
@@ -11,6 +12,15 @@ const SIDES: [WallSide; 4] = [
     WallSide::North,
     WallSide::West,
 ];
+
+/// Elevation-plane intersection between a brick and an opening in its wall.
+fn intersects_opening(p: &Placement, op: &Opening, spec: &WallSpec) -> bool {
+    p.wall == op.wall
+        && p.along() < op.right() - EPS
+        && p.along() + p.kind.length(spec) > op.x + EPS
+        && p.z < op.top() - EPS
+        && p.z + spec.brick.height > op.sill_height + EPS
+}
 
 #[test]
 fn course_count_is_derived_from_brick_and_joint_height() {
@@ -86,10 +96,13 @@ fn through_walls_reach_both_outer_corners() {
 fn no_two_placements_overlap_in_plan_within_a_course() {
     let specs = [
         room(2500.0, 2000.0, 400.0),
-        with_opening(room(3000.0, 2400.0, 2400.0), door(900.0, 800.0, 2000.0)),
-        with_opening(
+        with_openings(
             room(3000.0, 2400.0, 2400.0),
-            window(1000.0, 800.0, 600.0, 600.0),
+            vec![
+                door(WallSide::South, 900.0, 800.0, 2000.0),
+                window(WallSide::East, 800.0, 800.0, 600.0, 600.0),
+                window(WallSide::North, 400.0, 600.0, 900.0, 600.0),
+            ],
         ),
     ];
     for spec in &specs {
@@ -116,11 +129,7 @@ fn courses_cover_each_wall_span() {
     for course in 0..course_count(&spec) {
         for side in SIDES {
             let through = (course % 2 == 0) == side.along_x();
-            let extent = if side.along_x() {
-                spec.width
-            } else {
-                spec.length
-            };
+            let extent = spec.wall_extent(side);
             let (start, end) = if through {
                 (0.0, extent)
             } else {
@@ -152,42 +161,37 @@ fn courses_cover_each_wall_span() {
 }
 
 #[test]
-fn no_placement_intersects_the_opening() {
-    let specs = [
-        with_opening(room(3000.0, 2400.0, 2400.0), door(900.0, 800.0, 2000.0)),
-        with_opening(
-            room(3000.0, 2400.0, 2400.0),
-            window(1000.0, 800.0, 600.0, 600.0),
-        ),
-    ];
-    for spec in &specs {
-        let op = spec.opening.as_ref().unwrap();
-        for p in layout_walls(spec) {
-            if p.wall != WallSide::South {
-                continue;
-            }
-            // Front-wall elevation: x along the wall, z up.
-            let intersects = p.x < op.right() - EPS
-                && p.x + p.kind.length(spec) > op.x + EPS
-                && p.z < op.top() - EPS
-                && p.z + spec.brick.height > op.sill_height + EPS;
-            assert!(!intersects, "{p:?} intersects the opening");
+fn no_placement_intersects_any_opening() {
+    let spec = with_openings(
+        room(3000.0, 2400.0, 2400.0),
+        vec![
+            door(WallSide::South, 900.0, 800.0, 2000.0),
+            window(WallSide::South, 2000.0, 600.0, 1200.0, 600.0),
+            window(WallSide::West, 800.0, 800.0, 600.0, 600.0),
+        ],
+    );
+    for p in layout_walls(&spec) {
+        for op in &spec.openings {
+            assert!(
+                !intersects_opening(&p, op, &spec),
+                "{p:?} intersects {op:?}"
+            );
         }
     }
 }
 
 #[test]
-fn cut_bricks_abut_the_opening_edges() {
+fn cut_bricks_abut_opening_edges_on_a_side_wall() {
     let spec = with_opening(
         room(3000.0, 2400.0, 2400.0),
-        window(1000.0, 800.0, 600.0, 600.0),
+        window(WallSide::East, 800.0, 800.0, 600.0, 600.0),
     );
-    let op = spec.opening.as_ref().unwrap();
+    let op = &spec.openings[0];
     let placements = layout_walls(&spec);
     let in_opening: Vec<_> = placements
         .iter()
         .filter(|p| {
-            p.wall == WallSide::South
+            p.wall == WallSide::East
                 && p.z < op.top() - EPS
                 && p.z + spec.brick.height > op.sill_height + EPS
         })
@@ -195,12 +199,14 @@ fn cut_bricks_abut_the_opening_edges() {
     assert!(
         in_opening
             .iter()
-            .any(|p| (p.x + p.kind.length(&spec) - op.x).abs() < EPS),
-        "a brick should end flush against the opening's left edge"
+            .any(|p| (p.along() + p.kind.length(&spec) - op.x).abs() < EPS),
+        "a brick should end flush against the opening's near edge"
     );
     assert!(
-        in_opening.iter().any(|p| (p.x - op.right()).abs() < EPS),
-        "a brick should start flush against the opening's right edge"
+        in_opening
+            .iter()
+            .any(|p| (p.along() - op.right()).abs() < EPS),
+        "a brick should start flush against the opening's far edge"
     );
 }
 
@@ -209,9 +215,9 @@ fn course_above_a_window_spans_the_opening() {
     // Opening top is 600 + 600 = 1200, exactly the bottom of course 20.
     let spec = with_opening(
         room(3000.0, 2400.0, 2400.0),
-        window(1000.0, 800.0, 600.0, 600.0),
+        window(WallSide::South, 1000.0, 800.0, 600.0, 600.0),
     );
-    let op = spec.opening.as_ref().unwrap();
+    let op = &spec.openings[0];
     let lintel: Vec<_> = layout_walls(&spec)
         .into_iter()
         .filter(|p| p.wall == WallSide::South && p.course == 20)
@@ -226,11 +232,55 @@ fn course_above_a_window_spans_the_opening() {
 }
 
 #[test]
+fn a_segment_crossing_two_openings_is_cut_by_both() {
+    // Two windows close together: the strip between them (fits bricks)
+    // must exist and abut both openings.
+    let spec = with_openings(
+        room(3000.0, 2400.0, 2400.0),
+        vec![
+            window(WallSide::South, 800.0, 500.0, 600.0, 600.0),
+            window(WallSide::South, 1700.0, 500.0, 600.0, 600.0),
+        ],
+    );
+    let placements = layout_walls(&spec);
+    let between: Vec<_> = placements
+        .iter()
+        .filter(|p| {
+            p.wall == WallSide::South
+                && p.z > 600.0 - EPS
+                && p.z < 1200.0
+                && p.along() >= 1300.0 - EPS
+                && p.along() + p.kind.length(&spec) <= 1700.0 + EPS
+        })
+        .collect();
+    assert!(
+        !between.is_empty(),
+        "the pier between the two windows should have bricks"
+    );
+    assert!(
+        between.iter().any(|p| (p.along() - 1300.0).abs() < EPS),
+        "a brick should abut the first window's far edge"
+    );
+    assert!(
+        between
+            .iter()
+            .any(|p| (p.along() + p.kind.length(&spec) - 1700.0).abs() < EPS),
+        "a brick should abut the second window's near edge"
+    );
+}
+
+#[test]
 fn cut_bricks_are_never_shorter_than_the_minimum() {
     let specs = [
         room(2500.0, 2000.0, 2000.0),
         room(680.0, 460.0, 500.0),
-        with_opening(room(3000.0, 2400.0, 2400.0), door(215.0, 800.0, 2000.0)),
+        with_openings(
+            room(3000.0, 2400.0, 2400.0),
+            vec![
+                door(WallSide::South, 215.0, 800.0, 2000.0),
+                window(WallSide::North, 1000.0, 800.0, 600.0, 600.0),
+            ],
+        ),
     ];
     for spec in &specs {
         for p in layout_walls(spec) {
@@ -250,7 +300,7 @@ fn all_placements_stay_inside_the_footprint() {
         room(2500.0, 2000.0, 2000.0),
         with_opening(
             room(3000.0, 2400.0, 2400.0),
-            window(1000.0, 800.0, 600.0, 600.0),
+            window(WallSide::West, 1000.0, 800.0, 600.0, 600.0),
         ),
     ];
     for spec in &specs {
@@ -267,7 +317,7 @@ fn all_placements_stay_inside_the_footprint() {
 fn stats_match_the_placements() {
     let spec = with_opening(
         room(3000.0, 2400.0, 2400.0),
-        window(1000.0, 800.0, 600.0, 600.0),
+        window(WallSide::South, 1000.0, 800.0, 600.0, 600.0),
     );
     let plan = plan(spec.clone()).unwrap();
     let count = |pred: fn(&BrickKind) -> bool| {
