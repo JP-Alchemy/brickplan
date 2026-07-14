@@ -6,7 +6,7 @@ import PlaybackBar, { type Speed } from './components/PlaybackBar';
 import SpecControls, { type SpecDraft } from './components/SpecControls';
 import WallScene from './components/WallScene';
 import { planWall } from './planner';
-import type { PlanError, WallSpec } from './types';
+import type { Plan, PlanError, WallSpec } from './types';
 
 // NL waalformaat; brick size is deliberately not editable — the demo is
 // about the wall, and the planner treats brick dims as data regardless.
@@ -78,7 +78,15 @@ export default function App() {
   // nothing to debounce.
   const spec = useMemo(() => draftToSpec(draft), [draft]);
   const result = useMemo(() => planWall(spec), [spec]);
-  const plan = result.ok ?? null;
+  // While the spec is invalid, keep showing the last buildable plan with
+  // the error overlaid. This is kinder than a blank stage — and it means
+  // the WebGPU canvas is never unmounted, whose teardown/re-init race
+  // used to corrupt the renderer.
+  const lastGoodPlan = useRef<Plan | null>(null);
+  const plan = result.ok ?? lastGoodPlan.current;
+  useEffect(() => {
+    if (result.ok) lastGoodPlan.current = result.ok;
+  }, [result]);
   const totalSteps = plan?.steps.length ?? 0;
 
   // Editing the spec keeps the playback position; a shorter plan clamps it.
@@ -120,12 +128,14 @@ export default function App() {
       </header>
       <div className="app-body">
         <section className="content">
-          {plan ? (
-            <WallScene plan={plan} stepIndex={clampedStep} />
-          ) : (
-            <div className="plan-error" role="alert">
-              <p>No plan: {describeError(result.err!)}.</p>
-              <p>Adjust the spec — the planner rejects anything it cannot build.</p>
+          {plan && <WallScene plan={plan} stepIndex={clampedStep} />}
+          {result.err && (
+            <div className={plan ? 'plan-error plan-error-overlay' : 'plan-error'} role="alert">
+              <p>No plan: {describeError(result.err)}.</p>
+              <p>
+                Adjust the spec — the planner rejects anything it cannot build.
+                {plan && ' Showing the last buildable state.'}
+              </p>
             </div>
           )}
         </section>

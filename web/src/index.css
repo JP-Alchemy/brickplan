@@ -412,6 +412,20 @@ header.masthead > p {
   padding: 1.5rem;
 }
 
+/* Overlaid on the viewport while the last buildable plan stays visible. */
+.plan-error-overlay {
+  position: absolute;
+  left: 2.5rem;
+  bottom: 2.5rem;
+  background: var(--bg);
+  padding: 1rem 1.25rem;
+  z-index: 1;
+}
+
+.content {
+  position: relative;
+}
+
 .plan-error p:first-child {
   color: var(--wine);
   font-weight: 700;
