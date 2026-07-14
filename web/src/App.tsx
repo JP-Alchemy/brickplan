@@ -81,12 +81,13 @@ export default function App() {
   // While the spec is invalid, keep showing the last buildable plan with
   // the error overlaid. This is kinder than a blank stage — and it means
   // the WebGPU canvas is never unmounted, whose teardown/re-init race
-  // used to corrupt the renderer.
-  const lastGoodPlan = useRef<Plan | null>(null);
-  const plan = result.ok ?? lastGoodPlan.current;
-  useEffect(() => {
-    if (result.ok) lastGoodPlan.current = result.ok;
-  }, [result]);
+  // used to corrupt the renderer. (State adjusted during render, the
+  // documented pattern for remembering previous renders' values.)
+  const [lastGoodPlan, setLastGoodPlan] = useState<Plan | null>(null);
+  if (result.ok && result.ok !== lastGoodPlan) {
+    setLastGoodPlan(result.ok);
+  }
+  const plan = result.ok ?? lastGoodPlan;
   const totalSteps = plan?.steps.length ?? 0;
 
   // Editing the spec keeps the playback position; a shorter plan clamps it.
